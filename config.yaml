@@ -1,0 +1,24 @@
+algorithms :
+  "anon_etaamb":
+    description: "module d'anonymisation d'etaamb.be"
+    url: "https://github.com/PieterjanMontens/anon_etaamb"
+    params:
+      - "lang"
+    env_required:
+      - "ANON_ETAAMB_HOST"
+  "anon_test":
+    description: "renvoi du texte à l'identique"
+    url: ""
+    params: []
+    env_required: []
+  "anon_trazor":
+    description: "pseudonymisation par SaaS (textrazor)"
+    url: "https://www.textrazor.com/"
+    params: []
+    env_required: []
+  "anon_bert":
+    description: "pseudonymisation par Machine-Learning (BERT)"
+    url: "https://github.com/openjusticebe/anon_torch_bert"
+    params: []
+    env_required: 
+      - "ANON_BERT_HOST"

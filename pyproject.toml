@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "data_api"
+version = "0.1.0"
+description = ""
+authors = ["pmontens <pieterjan@montens.net>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+click = "^7.1.2"
+fastapi = "^0.61.2"
+uvicorn = "^0.12.2"
+pytz = "^2020.4"
+PyYAML = "^5.3.1"
+asyncpg = "^0.21.0"
+
+[tool.poetry.dev-dependencies]
+isort = "^5.6.4"
+flake8 = "^3.8.4"
+pylint = "^2.6.0"
+behave = "^1.2.6"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+api = "anon_api.main:main"
