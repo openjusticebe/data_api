@@ -1,15 +1,10 @@
-import yaml
 import os
 from datetime import datetime
 import pytz
 import calendar
+import math
 
-
-def cfg_get(config):
-    def_config_file = open('config_default.yaml', 'r')
-    def_config = yaml.safe_load(def_config_file)
-    return {**def_config, **config}
-
+COUNTER = 0
 
 def check_envs(env_list):
     return all(os.getenv(e) for e in env_list)
@@ -18,3 +13,17 @@ def check_envs(env_list):
 def get_now():
     now = datetime.now(pytz.utc)
     return calendar.timegm(now.utctimetuple())
+
+
+def status_get(start_time, version):
+    now = datetime.now(pytz.utc)
+    delta = now - start_time
+    delta_s = math.floor(delta.total_seconds())
+    return {
+        'all_systems': 'nominal',
+        'timestamp': str(now),
+        'online_since': str(start_time),
+        'online_for_seconds': delta_s,
+        'api_version': version,
+        'api_counter': COUNTER,
+    }

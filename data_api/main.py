@@ -4,19 +4,20 @@ import logging
 import os
 import sys
 import json
+import yaml
+import toml
 from datetime import datetime
 
 import asyncpg
 import pytz
 import uvicorn
-from fastapi import FastAPI, File, UploadFile
+from fastapi import Depends, FastAPI, File, UploadFile
 from starlette.middleware.cors import CORSMiddleware
-from starlette.graphql import GraphQLApp
+from starlette.requests import Request
 
-from anon_api.models import (
-    RunInModel,
-    RunOutModel,
-    ListOutModel,
+import data_api.lib_misc as lm
+from data_api.models import (
+    SubmitModel
 )
 
 
@@ -26,7 +27,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.getLevelName('INFO'))
 logger.addHandler(logging.StreamHandler())
 dir_path = os.path.dirname(os.path.realpath(__file__))
-sys.path.insert(1, f'{dir_path}/modules')
+
 config = {
     'postgresql': {
         'dsn': os.getenv('PG_DSN', 'postgres://user:pass@localhost:5432/db'),
@@ -43,12 +44,9 @@ config = {
     'log_level': 'info',
 }
 
-config = cfg_get(config)
-print("Applied configuration:")
-print(json.dumps(config, indent=2))
-
 VERSION = 1
 START_TIME = datetime.now(pytz.utc)
+
 
 async def get_db():
     global DB_POOL  # pylint:disable=global-statement
@@ -62,7 +60,6 @@ async def get_db():
 # #############################################################################
 
 app = FastAPI(root_path=config['proxy_prefix'])
-app.add_route("/gql", GraphQLApp(schema=graphene.Schema(query=Query)))
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -81,6 +78,11 @@ async def startup_event():
         DB_POOL = await asyncpg.create_pool(**config['postgresql'])
 
 
+@app.get("/")
+def root():
+    return lm.status_get(START_TIME, VERSION)
+
+
 @app.get("/submit")
 def root(query: SubmitModel, request: Request, db=Depends(get_db)):
     """
@@ -97,6 +99,7 @@ def root(query: SubmitModel, request: Request, db=Depends(get_db)):
         'api_version': VERSION,
     }
 
+
 # ##################################################################### STARTUP
 # #############################################################################
 def main():
@@ -106,12 +109,23 @@ def main():
     parser.add_argument('--config', dest='config', help='config file', default=None)
     parser.add_argument('--debug', dest='debug', action='store_true', default=False, help='Debug mode')
     args = parser.parse_args()
+
+    # XXX: Lambda is a hack : toml expects a callable
+    if args.config:
+        t_config = toml.load(['config_default.toml', args.config])
+    else:
+        t_config = toml.load('config_default.toml')
+
+    config = {**config, **t_config}
+
     if args.debug:
         logger.setLevel(logging.getLevelName('DEBUG'))
         logger.debug('Debug activated')
         config['log_level'] = 'debug'
         config['server']['log_level'] = 'debug'
         logger.debug('Arguments: %s', args)
+        logger.debug('config: %s', yaml.dump(config, indent=2))
+        # logger.debug('config: %s', toml.dumps(config))
 
     uvicorn.run(
         app,
