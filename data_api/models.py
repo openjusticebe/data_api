@@ -13,7 +13,8 @@ class SubmitModel(BaseModel):
     year: int = Field(..., description="Year")
     identifier: str = Field(..., description="Decision identifier")
     text: str = Field(..., description="Content of document")
-    user: str = Field(..., description="User key")
+    user_key: str = Field(..., description="User key")
+    meta: Json = None
 
     class Config:
         schema_extra = {
@@ -25,7 +26,8 @@ class SubmitModel(BaseModel):
                 'year': '2010',
                 'identifer': '999.999',
                 'text': 'Lorem Ipsum ...',
-                'user': 'OIJAS-OIQWE',
+                'user_key': 'OIJAS-OIQWE',
+                'meta': '{}',
             }}
 
 
