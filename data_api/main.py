@@ -17,7 +17,9 @@ from starlette.requests import Request
 
 import data_api.lib_misc as lm
 from data_api.models import (
-    SubmitModel
+    SubmitModel,
+    ReadModel,
+    UpdateModel
 )
 
 
@@ -83,22 +85,26 @@ def root():
     return lm.status_get(START_TIME, VERSION)
 
 
-@app.get("/submit")
-def root(query: SubmitModel, request: Request, db=Depends(get_db)):
+@app.get("/create")
+def create(query: SubmitModel, request: Request, db=Depends(get_db)):
     """
-    Query service status
+    Submit document endpoint
     """
-    now = datetime.now(pytz.utc)
-    delta = now - START_TIME
-    delta_s = math.floor(delta.total_seconds())
-    return {
-        'all_systems': 'nominal',
-        'timestamp': now,
-        'start_time': START_TIME,
-        'uptime': f'{delta_s} seconds | {divmod(delta_s, 60)[0]} minutes | {divmod(delta_s, 86400)[0]} days',
-        'api_version': VERSION,
-    }
+    return "ok"
 
+@app.get("/read")
+def read(query: ReadModel, request: Request, db=Depends(get_db)):
+    """
+    Access document endpoint
+    """
+    return "ok"
+
+@app.get("/update")
+def read(query: UpdateModel, request: Request, db=Depends(get_db)):
+    """
+    Update document endpoint
+    """
+    return "ok"
 
 # ##################################################################### STARTUP
 # #############################################################################

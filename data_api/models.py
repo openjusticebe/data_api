@@ -27,3 +27,33 @@ class SubmitModel(BaseModel):
                 'text': 'Lorem Ipsum ...',
                 'user': 'OIJAS-OIQWE',
             }}
+
+
+class ReadModel(BaseModel):
+    v: PositiveInt = Field(..., alias='_v', description="Version")
+    timestamp: datetime = Field(..., alias='_timestamp', description="Timestamp (UNIX Epoch)")
+    ecli: str = Field(..., description="Document ECLI Identifier")
+
+    class Config:
+        schema_extra = {
+            'example': {
+                '_v': 1,
+                '_timestamp': 1239120938,
+                'ecli': 'ECLI:BE:RSCE:2020:999.999',
+            }
+        }
+
+
+class UpdateModel(BaseModel):
+    v: PositiveInt = Field(..., alias='_v', description="Version")
+    timestamp: datetime = Field(..., alias='_timestamp', description="Timestamp (UNIX Epoch)")
+    ecli: str = Field(..., description="Document ECLI Identifier")
+
+    class Config:
+        schema_extra = {
+            'example': {
+                '_v': 1,
+                '_timestamp': 1239120938,
+                'ecli': 'ECLI:BE:RSCE:2020:999.999',
+            }
+        }
