@@ -2,6 +2,7 @@ FROM python:3.8-slim-buster
 
 ARG ENV="dev"
 ENV ENV=${ENV} \
+  PG_DSN=${PG_DSN} \
   PYTHONFAULTHANDLER=1 \
   PYTHONUNBUFFERED=1 \
   PYTHONHASHSEED=random \

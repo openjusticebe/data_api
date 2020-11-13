@@ -100,7 +100,7 @@ def read(query: ReadModel, request: Request, db=Depends(get_db)):
     return "ok"
 
 @app.get("/update")
-def read(query: UpdateModel, request: Request, db=Depends(get_db)):
+def update(query: UpdateModel, request: Request, db=Depends(get_db)):
     """
     Update document endpoint
     """
