@@ -1,2 +1,5 @@
 [postgresql]
 dsn = "postgres://intendant:0k0libes@localhost:5432/openjustice"
+[airtable]
+base_id = 'tbl5i4IVlZOiBIccx/viwPWkVgj44BPZe98'
+api_key = 'appzOA96atNpFNPZm'

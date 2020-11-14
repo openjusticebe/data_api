@@ -6,12 +6,15 @@ import sys
 import json
 import yaml
 import toml
+import random
+from airtable import airtable 
 from datetime import datetime
 
 import asyncpg
 import pytz
 import uvicorn
-from fastapi import Depends, FastAPI, File, UploadFile
+from fastapi import Depends, FastAPI, File, UploadFile, HTTPException
+from fastapi.responses import HTMLResponse
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 
@@ -44,6 +47,11 @@ config = {
         'timeout_keep_alive': 0,
     },
     'log_level': 'info',
+    'airtable': {
+        'base_id': os.getenv('AIRTABLE_BASE', ''),
+        'api_key': os.getenv('AIRTABLE_API', ''),
+    },
+    'salt': os.getenv('SALT', 'OpenJusticePirates'),
 }
 
 VERSION = 1
@@ -57,6 +65,11 @@ async def get_db():
         yield conn
     finally:
         await DB_POOL.release(conn)
+
+
+def doc_hash(ecli):
+    nonce = random.randint(1, 80000)
+    return str(abs(hash(F"{ecli}{nonce}{config['salt']}")))
 
 # ############################################################### SERVER ROUTES
 # #############################################################################
@@ -85,12 +98,51 @@ def root():
     return lm.status_get(START_TIME, VERSION)
 
 
-@app.get("/create")
-def create(query: SubmitModel, request: Request, db=Depends(get_db)):
+@app.post("/create")
+async def create(query: SubmitModel, request: Request, db=Depends(get_db)):
     """
     Submit document endpoint
     """
-    return "ok"
+    logger.info('Testing user key %s', query.user_key)
+    # FIXME : Fix airtable key checking
+    # at = airtable.Airtable(config['airtable']['base_id'], config['airtable']['api_key'])
+    # data = at.get('Test Users')
+    # at.get('Test Users', filter_by_formula=f"Key={query.user_key}")
+    if query.user_key != 'test_key':
+        raise HTTPException(status_code=401, detail="bad user key")
+
+    ecli = f"ECLI:{query.country}:{query.court}:{query.year}:{query.identifier}"
+    docHash = doc_hash(ecli)
+
+    sql = """
+    INSERT INTO ecli_document (
+        ecli,
+        country,
+        court,
+        year,
+        identifier,
+        text,
+        meta,
+        ukey,
+        hash
+    ) VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9);
+    """
+
+    await db.execute(
+        sql,
+        ecli,
+        query.country,
+        query.court,
+        query.year,
+        query.identifier,
+        query.text,
+        query.meta,
+        query.user_key,
+        docHash,
+    )
+    logger.debug('Wrote ecli %s to database', ecli)
+    return {'result': "ok", 'hash': docHash}
+
 
 @app.get("/read")
 def read(query: ReadModel, request: Request, db=Depends(get_db)):
@@ -99,12 +151,50 @@ def read(query: ReadModel, request: Request, db=Depends(get_db)):
     """
     return "ok"
 
+
 @app.get("/update")
 def update(query: UpdateModel, request: Request, db=Depends(get_db)):
     """
     Update document endpoint
     """
     return "ok"
+
+
+@app.get("/hash/{dochash}", response_class=HTMLResponse)
+async def gohash(dochash, db=Depends(get_db)):
+    sql = """
+    SELECT ecli, text FROM ecli_document WHERE hash = $1
+    """
+
+    res = await db.fetchrow(sql, dochash)
+    return """
+    <!DOCTYPE html>
+    <html lang="en"><body style="font-family:verdana">
+        <head><title>{ecli}</title></head>
+        <body>
+            {text}
+        </body>
+    </html>
+    """.format(ecli=res['ecli'], text=res['text'])
+
+
+@app.get("/html/{ecli}", response_class=HTMLResponse)
+async def ecli(ecli, db=Depends(get_db)):
+    sql = """
+    SELECT ecli, text FROM ecli_document WHERE ecli = $1
+    """
+
+    res = await db.fetchrow(sql, ecli)
+    return """
+    <!DOCTYPE html>
+    <html lang="en"><body style="font-family:verdana">
+        <head><title>{ecli}</title></head>
+        <body>
+            {text}
+        </body>
+    </html>
+    """.format(ecli=res['ecli'], text=res['text'])
+
 
 # ##################################################################### STARTUP
 # #############################################################################
