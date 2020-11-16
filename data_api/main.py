@@ -17,6 +17,7 @@ from fastapi import Depends, FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import HTMLResponse
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
+from fastapi.templating import Jinja2Templates
 
 import data_api.lib_misc as lm
 from data_api.models import (
@@ -82,6 +83,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+templates = Jinja2Templates(directory="templates")
 
 
 # ############################################################### SERVER ROUTES
@@ -161,21 +164,27 @@ def update(query: UpdateModel, request: Request, db=Depends(get_db)):
 
 
 @app.get("/hash/{dochash}", response_class=HTMLResponse)
-async def gohash(dochash, db=Depends(get_db)):
+async def gohash(request: Request, dochash: str, db=Depends(get_db)):
     sql = """
     SELECT ecli, text FROM ecli_document WHERE hash = $1
     """
 
     res = await db.fetchrow(sql, dochash)
-    return """
-    <!DOCTYPE html>
-    <html lang="en"><body style="font-family:verdana">
-        <head><title>{ecli}</title></head>
-        <body>
-            {text}
-        </body>
-    </html>
-    """.format(ecli=res['ecli'], text=res['text'])
+
+    return templates.TemplateResponse('share.html', {
+        'request': request,
+        'ecli': res['ecli'],
+        'text': res['text']
+    })
+    # return """
+    # <!DOCTYPE html>
+    # <html lang="en"><body style="font-family:verdana">
+    #     <head><title>{ecli}</title></head>
+    #     <body>
+    #         {text}
+    #     </body>
+    # </html>
+    # """.format(ecli=res['ecli'], text=res['text'])
 
 
 @app.get("/html/{ecli}", response_class=HTMLResponse)
