@@ -1,10 +1,106 @@
 <!DOCTYPE html>
-<html lang="en"><body style="font-family:verdana">
-    <head><title>OpenJustice  - {{ ecli}}</title></head>
+<html lang="en"><body>
+    <head>
+        <title>OpenJustice  - {{ ecli}}</title>
+        <style>
+            @import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;900&family=Special+Elite&family=VT323&family=Volkhov&display=swap');
+            body {
+                font-size:100%;
+                font-family: 'lato', sans-serif;
+                background-color:#f4f2f2;
+                background-image: radial-gradient(closest-side, transparent 99%, rgba(0,0,0,.03) 99%),
+                radial-gradient(closest-side, transparent 99%, rgba(0,0,0,.03) 99%);
+                background-size:80px 80px;
+                background-position:0 0, 40px 40px;
+                margin:0;
+                padding:0;
+            }
+
+            h1 {
+                font-family: 'Special Elit', 'VT323', 'Volkhov', monospace;
+                margin:0;
+                text-align:right;
+            }
+
+            header {
+                background-color:#fff;
+                margin:0;
+                padding:0;
+                margin-bottom:2rem;
+                font-size:1.3rem;
+                padding:.3rem 2rem;
+                display:flex;
+                flex-direction:row;
+                justify-content:space-between;
+            }
+
+            header a {
+                color:#333;
+                text-decoration:none;
+            }
+
+            header a:hover {
+                color:#888;
+                text-decoration:underline;
+            }
+
+            /*
+            a#oj {
+                font-family: 'Special Elite', 'VT323', 'Volkhov', monospace;
+            }
+            */
+
+            .text {
+                font-size:1em;
+                width:50rem;
+                padding:5rem;
+                margin: 0 auto;
+                overflow:hidden;
+                background-color:#f9f7f7;
+                box-shadow: 0px 0px 12px #dfdede;
+                margin-bottom: 5rem;
+            }
+            header ul {
+                list-style-type:none;
+                display:flex;
+                flex-direction:row;
+                justify-content:space-around;
+                width:16rem;
+                font-size:.8em;
+                padding:.3rem 0 .3rem;
+                margin:0;
+            }
+
+            @media screen and (max-width: 1000px) {
+              .text {
+                width:auto;
+                margin:0;
+                padding:5%;
+             }
+            }
+            @media screen and (min-width: 2200px) {
+              .text {
+                column-count: auto;
+                column-gap:5rem;
+                column-width:50rem;
+                width:80%;
+             }
+            }
+        </style>
+    </head>
     <body>
-        <h1>{{ ecli }}</h1>
-        <pre>
-            {{ text }}
-        </pre>
+        <header>
+            <div>
+                a project by <a id="oj" href="https://openjustice.be"><small>vzw/asbl</small> OpenJustice.be</a>
+            </div>
+            <ul>
+                <li><a href="mailto:team@openjustice.be">Contact</a></li>
+                <li><a href="https://openjustice.be">Support Us</a></li>
+            </ul>
+        </header>
+        <div class="text">
+            <h1 class="title">{{ ecli }}</h1>
+            {{ text|safe }}
+        </div>
     </body>
 </html>

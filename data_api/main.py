@@ -7,6 +7,7 @@ import json
 import yaml
 import toml
 import random
+from markdown2 import Markdown
 from airtable import airtable 
 from datetime import datetime
 
@@ -18,12 +19,14 @@ from fastapi.responses import HTMLResponse
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from fastapi.templating import Jinja2Templates
+from pydantic import Json
 
 import data_api.lib_misc as lm
 from data_api.models import (
     SubmitModel,
     ReadModel,
-    UpdateModel
+    UpdateModel,
+    ListModel, ListTypes,
 )
 
 
@@ -55,7 +58,7 @@ config = {
     'salt': os.getenv('SALT', 'OpenJusticePirates'),
 }
 
-VERSION = 1
+VERSION = 2
 START_TIME = datetime.now(pytz.utc)
 
 
@@ -69,8 +72,9 @@ async def get_db():
 
 
 def doc_hash(ecli):
-    nonce = random.randint(1, 80000)
-    return str(abs(hash(F"{ecli}{nonce}{config['salt']}")))
+    nonce = random.randint(0, 99999999)
+    num = hex(abs(hash(F"{ecli}{nonce}{config['salt']}{datetime.now()}")))
+    return num.lstrip("0x").rstrip("L")
 
 # ############################################################### SERVER ROUTES
 # #############################################################################
@@ -108,13 +112,16 @@ async def create(query: SubmitModel, request: Request, db=Depends(get_db)):
     """
     logger.info('Testing user key %s', query.user_key)
     # FIXME : Fix airtable key checking
-    # at = airtable.Airtable(config['airtable']['base_id'], config['airtable']['api_key'])
-    # data = at.get('Test Users')
-    # at.get('Test Users', filter_by_formula=f"Key={query.user_key}")
-    if query.user_key != 'test_key':
+    at = airtable.Airtable(config['airtable']['base_id'], config['airtable']['api_key'])
+    res = at.get('Test Users', filter_by_formula="FIND('%s', {Key})=1" % query.user_key)
+    ecli = f"ECLI:{query.country}:{query.court}:{query.year}:{query.identifier}"
+
+    if res and 'records' in res and len(res['records']) == 1:
+        rec = res['records'][0]['fields']
+        logger.info("User %s / %s submitting text %s", rec['Name'], rec['Email'], ecli)
+    else:
         raise HTTPException(status_code=401, detail="bad user key")
 
-    ecli = f"ECLI:{query.country}:{query.court}:{query.year}:{query.identifier}"
     docHash = doc_hash(ecli)
 
     sql = """
@@ -127,8 +134,9 @@ async def create(query: SubmitModel, request: Request, db=Depends(get_db)):
         text,
         meta,
         ukey,
+        lang,
         hash
-    ) VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9);
+    ) VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
     """
 
     await db.execute(
@@ -139,11 +147,12 @@ async def create(query: SubmitModel, request: Request, db=Depends(get_db)):
         query.year,
         query.identifier,
         query.text,
-        query.meta,
+        json.dumps(query.meta),
         query.user_key,
+        query.lang,
         docHash,
     )
-    logger.debug('Wrote ecli %s to database', ecli)
+    logger.debug('Wrote ecli %s ( hash %s )to database', ecli, docHash)
     return {'result': "ok", 'hash': docHash}
 
 
@@ -152,7 +161,7 @@ def read(query: ReadModel, request: Request, db=Depends(get_db)):
     """
     Access document endpoint
     """
-    return "ok"
+    raise HTTPException(status_code=501, detail="Not implemented")
 
 
 @app.get("/update")
@@ -160,7 +169,38 @@ def update(query: UpdateModel, request: Request, db=Depends(get_db)):
     """
     Update document endpoint
     """
-    return "ok"
+    raise HTTPException(status_code=501, detail="Not implemented")
+
+
+@app.get("/list")
+async def list(request: Request, db=Depends(get_db), level: ListTypes = 'country', data: Json={}):
+    """
+    List available data according to query
+    """
+    if level not in ListTypes._member_names_:
+        raise HTTPException(status_code=400, detail="Bad Request")
+
+    try:
+        if level == ListTypes.country:
+            response = 'BE'
+
+        if level == ListTypes.court:
+            response = await lm.listCourts(db, data['country'])
+
+        if level == ListTypes.year:
+            response = await lm.listYears(db, data['country'], data['court'])
+
+        if level == ListTypes.document:
+            response = await lm.listDocuments(db, data['country'], data['court'], data['year'])
+
+        if type(response) is not list:
+            return [response]
+        return response
+
+    except KeyError:
+        raise HTTPException(status_code=417, detail="Missing data")
+    except RuntimeError:
+        raise HTTPException(status_code=404, detail="Not Found")
 
 
 @app.get("/hash/{dochash}", response_class=HTMLResponse)
@@ -171,38 +211,42 @@ async def gohash(request: Request, dochash: str, db=Depends(get_db)):
 
     res = await db.fetchrow(sql, dochash)
 
+    if not res:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    markdowner = Markdown()
+    html_text = markdowner.convert(
+        res['text'].replace('_', '\_')
+    )
+
     return templates.TemplateResponse('share.html', {
         'request': request,
         'ecli': res['ecli'],
-        'text': res['text']
+        'text': html_text
     })
-    # return """
-    # <!DOCTYPE html>
-    # <html lang="en"><body style="font-family:verdana">
-    #     <head><title>{ecli}</title></head>
-    #     <body>
-    #         {text}
-    #     </body>
-    # </html>
-    # """.format(ecli=res['ecli'], text=res['text'])
 
 
 @app.get("/html/{ecli}", response_class=HTMLResponse)
-async def ecli(ecli, db=Depends(get_db)):
+async def ecli(request: Request, ecli, db=Depends(get_db)):
     sql = """
     SELECT ecli, text FROM ecli_document WHERE ecli = $1
     """
 
     res = await db.fetchrow(sql, ecli)
-    return """
-    <!DOCTYPE html>
-    <html lang="en"><body style="font-family:verdana">
-        <head><title>{ecli}</title></head>
-        <body>
-            {text}
-        </body>
-    </html>
-    """.format(ecli=res['ecli'], text=res['text'])
+
+    if not res:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    markdowner = Markdown()
+    html_text = markdowner.convert(
+        res['text'].replace('_', '\_')
+    )
+
+    return templates.TemplateResponse('share.html', {
+        'request': request,
+        'ecli': res['ecli'],
+        'text': html_text
+    })
 
 
 # ##################################################################### STARTUP
