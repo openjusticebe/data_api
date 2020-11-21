@@ -3,6 +3,14 @@ from enum import Enum
 from typing import List
 
 from pydantic import BaseModel, Field, Json, PositiveInt
+from enum import Enum
+
+
+class ListTypes(str, Enum):
+    country = 'country'
+    court = 'court'
+    year = 'year'
+    document = 'document'
 
 
 class SubmitModel(BaseModel):
@@ -42,6 +50,23 @@ class ReadModel(BaseModel):
                 '_v': 1,
                 '_timestamp': 1239120938,
                 'ecli': 'ECLI:BE:RSCE:2020:999.999',
+            }
+        }
+
+
+class ListModel(BaseModel):
+    v: PositiveInt = Field(..., alias='_v', description="Version")
+    timestamp: datetime = Field(..., alias='_timestamp', description="Timestamp (UNIX Epoch)")
+    level: ListTypes = Field(..., description="Navigation Level")
+    data: Json = None
+
+    class Config:
+        schema_extra = {
+            'example': {
+                '_v': 1,
+                '_timestamp': 1239120938,
+                'level': 'court',
+                'data': '{"country":"BE"}',
             }
         }
 

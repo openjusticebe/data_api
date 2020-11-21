@@ -19,12 +19,14 @@ from fastapi.responses import HTMLResponse
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from fastapi.templating import Jinja2Templates
+from pydantic import Json
 
 import data_api.lib_misc as lm
 from data_api.models import (
     SubmitModel,
     ReadModel,
-    UpdateModel
+    UpdateModel,
+    ListModel, ListTypes,
 )
 
 
@@ -157,7 +159,7 @@ def read(query: ReadModel, request: Request, db=Depends(get_db)):
     """
     Access document endpoint
     """
-    return "ok"
+    raise HTTPException(status_code=501, detail="Not implemented")
 
 
 @app.get("/update")
@@ -165,7 +167,38 @@ def update(query: UpdateModel, request: Request, db=Depends(get_db)):
     """
     Update document endpoint
     """
-    return "ok"
+    raise HTTPException(status_code=501, detail="Not implemented")
+
+
+@app.get("/list")
+async def list(request: Request, db=Depends(get_db), level: ListTypes = 'country', data: Json={}):
+    """
+    List available data according to query
+    """
+    if level not in ListTypes._member_names_:
+        raise HTTPException(status_code=400, detail="Bad Request")
+
+    try:
+        if level == ListTypes.country:
+            response = 'BE'
+
+        if level == ListTypes.court:
+            response = await lm.listCourts(db, data['country'])
+
+        if level == ListTypes.year:
+            response = await lm.listYears(db, data['country'], data['court'])
+
+        if level == ListTypes.document:
+            response = await lm.listDocuments(db, data['country'], data['court'], data['year'])
+
+        if type(response) is not list:
+            return [response]
+        return response
+
+    except KeyError:
+        raise HTTPException(status_code=417, detail="Missing data")
+    except RuntimeError:
+        raise HTTPException(status_code=404, detail="Not Found")
 
 
 @app.get("/hash/{dochash}", response_class=HTMLResponse)
@@ -175,6 +208,10 @@ async def gohash(request: Request, dochash: str, db=Depends(get_db)):
     """
 
     res = await db.fetchrow(sql, dochash)
+
+    if not res:
+        raise HTTPException(status_code=404, detail="Document not found")
+
     markdowner = Markdown()
     html_text = markdowner.convert(
         res['text'].replace('_', '\_')
@@ -194,6 +231,10 @@ async def ecli(request: Request, ecli, db=Depends(get_db)):
     """
 
     res = await db.fetchrow(sql, ecli)
+
+    if not res:
+        raise HTTPException(status_code=404, detail="Document not found")
+
     markdowner = Markdown()
     html_text = markdowner.convert(
         res['text'].replace('_', '\_')
