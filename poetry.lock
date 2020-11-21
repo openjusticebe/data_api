@@ -167,6 +167,14 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [[package]]
+name = "markdown2"
+version = "2.3.10"
+description = "A fast and complete Python implementation of Markdown"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "markupsafe"
 version = "1.1.1"
 description = "Safely add untrusted strings to HTML/XML markup."
@@ -350,7 +358,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "0daf9e778506b31b02bb83459bb6540ed0e5b1d8b8942c2fd1d5c4e731e44fed"
+content-hash = "936de349c7948f3d2ad6f2b9007ed755323658cbc025b8aa626d8609b39d4122"
 
 [metadata.files]
 airtable = [
@@ -453,6 +461,10 @@ lazy-object-proxy = [
     {file = "lazy_object_proxy-1.4.3-cp38-cp38-manylinux1_x86_64.whl", hash = "sha256:a6ae12d08c0bf9909ce12385803a543bfe99b95fe01e752536a60af2b7797c62"},
     {file = "lazy_object_proxy-1.4.3-cp38-cp38-win32.whl", hash = "sha256:5541cada25cd173702dbd99f8e22434105456314462326f06dba3e180f203dfd"},
     {file = "lazy_object_proxy-1.4.3-cp38-cp38-win_amd64.whl", hash = "sha256:59f79fef100b09564bc2df42ea2d8d21a64fdcda64979c0fa3db7bdaabaf6239"},
+]
+markdown2 = [
+    {file = "markdown2-2.3.10-py2.py3-none-any.whl", hash = "sha256:fef148e5fd68d4532286c3e2943e9d2c076a8ad781b0a70a9d599a0ffe91652d"},
+    {file = "markdown2-2.3.10.tar.gz", hash = "sha256:85956d8119fa6378156fef65545d66705a842819d2e1b50379a2b9d2aaa17cf0"},
 ]
 markupsafe = [
     {file = "MarkupSafe-1.1.1-cp27-cp27m-macosx_10_6_intel.whl", hash = "sha256:09027a7803a62ca78792ad89403b1b7a73a01c8cb65909cd876f7fcebd79b161"},
