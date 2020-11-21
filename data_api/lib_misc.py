@@ -21,7 +21,7 @@ def status_get(start_time, version):
     delta_s = math.floor(delta.total_seconds())
     return {
         'all_systems': 'nominal',
-        'id': 'data_ip',
+        'id': __name__,
         'timestamp': str(now),
         'online_since': str(start_time),
         'online_for_seconds': delta_s,
