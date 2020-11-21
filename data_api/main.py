@@ -134,8 +134,9 @@ async def create(query: SubmitModel, request: Request, db=Depends(get_db)):
         text,
         meta,
         ukey,
+        lang,
         hash
-    ) VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9);
+    ) VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
     """
 
     await db.execute(
@@ -148,6 +149,7 @@ async def create(query: SubmitModel, request: Request, db=Depends(get_db)):
         query.text,
         json.dumps(query.meta),
         query.user_key,
+        query.lang,
         docHash,
     )
     logger.debug('Wrote ecli %s ( hash %s )to database', ecli, docHash)

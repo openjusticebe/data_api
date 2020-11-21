@@ -12,6 +12,11 @@ class ListTypes(str, Enum):
     year = 'year'
     document = 'document'
 
+class LanguageTypes(str, Enum):
+    FR = 'FR'
+    NL = 'NL'
+    DE = 'DE'
+
 
 class SubmitModel(BaseModel):
     v: PositiveInt = Field(..., alias='_v', description="Version")
@@ -21,6 +26,7 @@ class SubmitModel(BaseModel):
     year: int = Field(..., description="Year")
     identifier: str = Field(..., description="Decision identifier")
     text: str = Field(..., description="Content of document")
+    lang: LanguageTypes = Field(..., description="Document Language")
     user_key: str = Field(..., description="User key")
     meta: Json = None
 
@@ -34,6 +40,7 @@ class SubmitModel(BaseModel):
                 'year': 2010,
                 'identifier': '999.999',
                 'text': 'Lorem Ipsum ...',
+                'lang': 'NL',
                 'user_key': 'OIJAS-OIQWE',
                 'meta': '{}',
             }}

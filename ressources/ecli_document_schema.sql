@@ -18,6 +18,7 @@ CREATE TABLE "ecli_document" (
     meta JSONB,
     flags TEXT[],
     ukey TEXT,
+    lang VARCHAR(2),
     date_created TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     date_updated TIMESTAMP WITH TIME ZONE
 );
