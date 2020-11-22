@@ -61,7 +61,7 @@ async def listYears(db, country, court):
 
 async def listDocuments(db, country, court, year):
     sql = """
-    SELECT DISTINCT(ecli) AS documents
+    SELECT identifier AS documents
     FROM ecli_document
     WHERE country = $1
     AND court = $2
