@@ -174,7 +174,7 @@ def update(query: UpdateModel, request: Request, db=Depends(get_db)):
 
 
 @app.get("/list")
-async def list(request: Request, db=Depends(get_db), level: ListTypes = 'country', data: Json = {}):
+async def getList(request: Request, db=Depends(get_db), level: ListTypes = 'country', data: Json = {}):
     """
     List available data according to query
     """
