@@ -35,7 +35,7 @@ async def listCourts(db, country):
     SELECT DISTINCT(court) AS courts
     FROM ecli_document
     WHERE status = 'public'
-    country = $1
+    AND country = $1
     """
 
     res = await db.fetch(sql, country)
