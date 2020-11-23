@@ -32,10 +32,13 @@ def status_get(start_time, version):
 
 async def listCourts(db, country):
     sql = """
-    SELECT DISTINCT(court) AS courts FROM ecli_document WHERE country = $1
+    SELECT DISTINCT(court) AS courts
+    FROM ecli_document
+    WHERE status = 'public'
+    country = $1
     """
 
-    res = await db.fetchrow(sql, country)
+    res = await db.fetch(sql, country)
 
     if not res:
         raise RuntimeError("No results")
@@ -47,11 +50,12 @@ async def listYears(db, country, court):
     sql = """
     SELECT DISTINCT(year) AS years
     FROM ecli_document
-    WHERE country = $1
+    WHERE status = 'public'
+    AND country = $1
     AND court = $2
     """
 
-    res = await db.fetchrow(sql, country, court)
+    res = await db.fetch(sql, country, court)
 
     if not res:
         raise RuntimeError("No results")
@@ -63,12 +67,13 @@ async def listDocuments(db, country, court, year):
     sql = """
     SELECT identifier AS documents
     FROM ecli_document
-    WHERE country = $1
+    WHERE status = 'public'
+    AND country = $1
     AND court = $2
     AND year = $3
     """
 
-    res = await db.fetchrow(sql, country, court, year)
+    res = await db.fetch(sql, country, court, year)
 
     if not res:
         raise RuntimeError("No results")

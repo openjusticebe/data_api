@@ -2,13 +2,12 @@
 import argparse
 import logging
 import os
-import sys
 import json
 import yaml
 import toml
 import random
 from markdown2 import Markdown
-from airtable import airtable 
+from airtable import airtable
 from datetime import datetime
 
 import asyncpg
