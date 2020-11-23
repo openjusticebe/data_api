@@ -2,19 +2,18 @@
 import argparse
 import logging
 import os
-import sys
 import json
 import yaml
 import toml
 import random
 from markdown2 import Markdown
-from airtable import airtable 
+from airtable import airtable
 from datetime import datetime
 
 import asyncpg
 import pytz
 import uvicorn
-from fastapi import Depends, FastAPI, File, UploadFile, HTTPException
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import HTMLResponse
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
@@ -26,7 +25,8 @@ from data_api.models import (
     SubmitModel,
     ReadModel,
     UpdateModel,
-    ListModel, ListTypes,
+    # ListModel,
+    ListTypes,
 )
 
 
@@ -78,6 +78,7 @@ def doc_hash(ecli):
 
 # ############################################################### SERVER ROUTES
 # #############################################################################
+
 
 app = FastAPI(root_path=config['proxy_prefix'])
 app.add_middleware(
@@ -173,7 +174,7 @@ def update(query: UpdateModel, request: Request, db=Depends(get_db)):
 
 
 @app.get("/list")
-async def list(request: Request, db=Depends(get_db), level: ListTypes = 'country', data: Json={}):
+async def getList(request: Request, db=Depends(get_db), level: ListTypes = 'country', data: Json = {}):
     """
     List available data according to query
     """
@@ -193,7 +194,7 @@ async def list(request: Request, db=Depends(get_db), level: ListTypes = 'country
         if level == ListTypes.document:
             response = await lm.listDocuments(db, data['country'], data['court'], data['year'])
 
-        if type(response) is not list:
+        if not isinstance(response, list):
             return [response]
         return response
 
@@ -216,7 +217,7 @@ async def gohash(request: Request, dochash: str, db=Depends(get_db)):
 
     markdowner = Markdown()
     html_text = markdowner.convert(
-        res['text'].replace('_', '\_')
+        res['text'].replace('_', '\\_')
     )
 
     return templates.TemplateResponse('share.html', {
@@ -239,7 +240,7 @@ async def ecli(request: Request, ecli, db=Depends(get_db)):
 
     markdowner = Markdown()
     html_text = markdowner.convert(
-        res['text'].replace('_', '\_')
+        res['text'].replace('_', '\\_')
     )
 
     return templates.TemplateResponse('share.html', {
