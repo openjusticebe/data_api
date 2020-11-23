@@ -194,11 +194,7 @@ async def getList(request: Request, db=Depends(get_db), level: ListTypes = 'coun
         if level == ListTypes.document:
             response = await lm.listDocuments(db, data['country'], data['court'], data['year'])
 
-        print(response)
-        print(type(response))
-        # if type(response) is not list:
         if not isinstance(response, list):
-            print('Is not a list')
             return [response]
         return response
 
