@@ -38,12 +38,12 @@ async def listCourts(db, country):
     AND country = $1
     """
 
-    res = await db.fetch(sql, country)
+    rows = await db.fetch(sql, country)
 
-    if not res:
+    if not rows:
         raise RuntimeError("No results")
 
-    return res['courts']
+    return [x['courts'] for x in rows]
 
 
 async def listYears(db, country, court):
@@ -55,12 +55,12 @@ async def listYears(db, country, court):
     AND court = $2
     """
 
-    res = await db.fetch(sql, country, court)
+    rows = await db.fetch(sql, country, court)
 
-    if not res:
+    if not rows:
         raise RuntimeError("No results")
 
-    return res['years']
+    return [x['years'] for x in rows]
 
 
 async def listDocuments(db, country, court, year):
@@ -73,9 +73,9 @@ async def listDocuments(db, country, court, year):
     AND year = $3
     """
 
-    res = await db.fetch(sql, country, court, year)
+    rows = await db.fetch(sql, country, court, year)
 
-    if not res:
+    if not rows:
         raise RuntimeError("No results")
 
-    return res['documents']
+    return [x['documents'] for x in rows]
