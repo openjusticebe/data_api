@@ -196,7 +196,8 @@ async def list(request: Request, db=Depends(get_db), level: ListTypes = 'country
 
         print(response)
         print(type(response))
-        if type(response) is not list:
+        # if type(response) is not list:
+        if not isinstance(response, list):
             print('Is not a list')
             return [response]
         return response
