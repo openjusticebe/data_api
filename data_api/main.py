@@ -58,7 +58,7 @@ config = {
     'salt': os.getenv('SALT', 'OpenJusticePirates'),
 }
 
-VERSION = 2
+VERSION = 3
 START_TIME = datetime.now(pytz.utc)
 
 
@@ -248,6 +248,24 @@ async def ecli(request: Request, ecli, db=Depends(get_db)):
         'ecli': res['ecli'],
         'text': html_text
     })
+
+
+@app.get("/tags/{begin}")
+async def tags(begin, db=Depends(get_db)):
+    """
+    Return matching tags (only search from beginning of string)
+    """
+    sql = """
+    SELECT tag FROM tags WHERE LOWER(tag) LIKE $1 || '%'
+    """
+
+    res = await db.fetch(sql, begin.lower())
+
+    output = []
+    for row in res:
+        output.append(row['tag'])
+
+    return output
 
 
 # ##################################################################### STARTUP
