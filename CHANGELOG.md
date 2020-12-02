@@ -8,9 +8,9 @@ and to the [CHANGELOG recommendations](http://keepachangelog.com/).
 ## Alpha Development
 
 ### [0.2.1] - (2020-12-01)
-- tags are labels now
-- added tags endpoint
-- added tags database schema
+- added labels endpoint
+- added labels database schema
+- storing user-defined labels in database
 
 
 ### [0.2.0] - (2020-11-21)

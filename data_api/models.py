@@ -28,6 +28,7 @@ class SubmitModel(BaseModel):
     text: str = Field(..., description="Content of document")
     lang: LanguageTypes = Field(..., description="Document Language")
     user_key: str = Field(..., description="User key")
+    labels: list
     meta: Json = None
 
     class Config:
@@ -42,6 +43,7 @@ class SubmitModel(BaseModel):
                 'text': 'Lorem Ipsum ...',
                 'lang': 'NL',
                 'user_key': 'OIJAS-OIQWE',
+                'labels': [],
                 'meta': '{}',
             }}
 
