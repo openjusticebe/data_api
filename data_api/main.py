@@ -58,7 +58,7 @@ config = {
     'salt': os.getenv('SALT', 'OpenJusticePirates'),
 }
 
-VERSION = 2
+VERSION = 3
 START_TIME = datetime.now(pytz.utc)
 
 
@@ -123,6 +123,9 @@ async def create(query: SubmitModel, request: Request, db=Depends(get_db)):
     else:
         raise HTTPException(status_code=401, detail="bad user key")
 
+    meta = query.meta if query.meta is not None else {}
+    meta['labels'] = query.labels
+
     docHash = doc_hash(ecli)
 
     sql = """
@@ -148,12 +151,20 @@ async def create(query: SubmitModel, request: Request, db=Depends(get_db)):
         query.year,
         query.identifier,
         query.text,
-        json.dumps(query.meta),
+        json.dumps(meta),
         query.user_key,
         query.lang,
         docHash,
     )
-    logger.debug('Wrote ecli %s ( hash %s )to database', ecli, docHash)
+
+    # Keep labels in database for reuse
+    for label in query.labels:
+        check = await db.fetchrow("SELECT 'one' FROM labels WHERE label = $1", label)
+        if not check:
+            logging.debug("New label : %s", label)
+            await db.execute("INSERT INTO labels (label, category) VALUES ($1, 'user_defined')", label)
+
+    logger.debug('Wrote ecli %s ( hash %s ) to database', ecli, docHash)
     return {'result': "ok", 'hash': docHash}
 
 
@@ -248,6 +259,24 @@ async def ecli(request: Request, ecli, db=Depends(get_db)):
         'ecli': res['ecli'],
         'text': html_text
     })
+
+
+@app.get("/labels/{begin}")
+async def labels(begin, db=Depends(get_db)):
+    """
+    Return matching labels (only search from beginning of string)
+    """
+    sql = """
+    SELECT label FROM labels WHERE LOWER(label) LIKE $1 || '%'
+    """
+
+    res = await db.fetch(sql, begin.lower())
+
+    output = []
+    for row in res:
+        output.append(row['label'])
+
+    return output
 
 
 # ##################################################################### STARTUP
