@@ -250,20 +250,20 @@ async def ecli(request: Request, ecli, db=Depends(get_db)):
     })
 
 
-@app.get("/tags/{begin}")
-async def tags(begin, db=Depends(get_db)):
+@app.get("/labels/{begin}")
+async def labels(begin, db=Depends(get_db)):
     """
-    Return matching tags (only search from beginning of string)
+    Return matching labels (only search from beginning of string)
     """
     sql = """
-    SELECT tag FROM tags WHERE LOWER(tag) LIKE $1 || '%'
+    SELECT label FROM labels WHERE LOWER(label) LIKE $1 || '%'
     """
 
     res = await db.fetch(sql, begin.lower())
 
     output = []
     for row in res:
-        output.append(row['tag'])
+        output.append(row['label'])
 
     return output
 
