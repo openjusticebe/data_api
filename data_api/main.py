@@ -239,7 +239,7 @@ async def gohash(request: Request, dochash: str, db=Depends(get_db)):
         'request': request,
         'ecli': res['ecli'],
         'text': html_text,
-        'labels': json.loads(res['labels'])
+        'labels': json.loads(res['labels']) if res['labels'] else []
     })
 
 
@@ -264,7 +264,7 @@ async def ecli(request: Request, ecli, db=Depends(get_db)):
         'request': request,
         'ecli': res['ecli'],
         'text': html_text,
-        'labels': res['labels']
+        'labels': json.loads(res['labels']) if res['labels'] else []
     })
 
 
