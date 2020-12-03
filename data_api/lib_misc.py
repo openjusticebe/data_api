@@ -6,6 +6,7 @@ import math
 
 COUNTER = 0
 
+
 def check_envs(env_list):
     return all(os.getenv(e) for e in env_list)
 

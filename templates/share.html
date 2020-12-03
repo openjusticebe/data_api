@@ -12,6 +12,7 @@
                 radial-gradient(closest-side, transparent 99%, rgba(0,0,0,.03) 99%);
                 background-size:80px 80px;
                 background-position:0 0, 40px 40px;
+                font-size:16px;
                 margin:0;
                 padding:0;
             }
@@ -51,7 +52,7 @@
             */
 
             .text {
-                font-size:1em;
+                font-size:1.1em;
                 width:50rem;
                 padding:5rem;
                 margin: 0 auto;
@@ -86,6 +87,38 @@
                 width:80%;
              }
             }
+
+            /* Specific formatting styles */
+            .page_bar {
+              border-top:1px solid #ccc;
+              text-align:center;
+              padding-top:2px;
+              margin:2rem 0;
+            }
+
+            .page_bar a{
+              color:#333;
+              font-size:.8em;
+              text-decoration:none;
+            }
+
+            .page_bar a:hover{
+              text-decoration:underline;
+            }
+
+            ul.label {
+              display:flex;
+              justify-content: flex-end;
+              list-style-type:none;
+            }
+            ul.label li {
+              font-family: 'lato';
+              background-color:#555;
+              color:#eee;
+              border-radius:5px;
+              padding:.4rem 1rem;
+              font-size:1.4rem;
+            }
         </style>
     </head>
     <body>
@@ -100,6 +133,11 @@
         </header>
         <div class="text">
             <h1 class="title">{{ ecli }}</h1>
+            <ul class="label">
+            {% for label in labels %}
+            <li><small>#</small>{{ label }}</li> 
+            {% endfor %}
+            </ul>
             {{ text|safe }}
         </div>
     </body>
