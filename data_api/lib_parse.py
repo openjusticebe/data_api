@@ -20,5 +20,5 @@ def page_breaks(text):
     global ITER
     # text = re.sub(r"---(.*?)---", r'<div class="page_bar">\1</div>', text)
     ITER = 1
-    text = re.sub(r"---(.*?)---", repl, text)
+    text = re.sub(r"^---(.+?)---$", repl, text)
     return text

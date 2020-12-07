@@ -221,7 +221,7 @@ async def getList(request: Request, db=Depends(get_db), level: ListTypes = 'coun
 @app.get("/hash/{dochash}", response_class=HTMLResponse)
 async def gohash(request: Request, dochash: str, db=Depends(get_db)):
     sql = """
-    SELECT ecli, text, meta->'labels' as labels FROM ecli_document WHERE hash = $1
+    SELECT id_internal, ecli, text, meta->'labels' as labels FROM ecli_document WHERE hash = $1
     """
 
     res = await db.fetchrow(sql, dochash)
@@ -235,11 +235,28 @@ async def gohash(request: Request, dochash: str, db=Depends(get_db)):
     )
     html_text = convert(html_text)
 
+    sql_links = """
+    SELECT target_type, target_identifier, target_label
+    FROM ecli_links
+    WHERE id_internal = $1
+    """
+
+    res2 = await db.fetch(sql_links, res['id_internal'])
+    ecli_links = []
+    eli_links = []
+    for row in res2:
+        if row['target_type'] == 'ecli':
+            ecli_links.append({'name': row['target_label'], 'id': row['target_identifier']})
+        elif row['target_type'] == 'eli':
+            eli_links.append({'name': row['target_label'], 'link': row['target_identifier']})
+
     return templates.TemplateResponse('share.html', {
         'request': request,
         'ecli': res['ecli'],
         'text': html_text,
-        'labels': json.loads(res['labels']) if res['labels'] else []
+        'labels': json.loads(res['labels']) if res['labels'] else [],
+        'elis': eli_links,
+        'eclis': ecli_links,
     })
 
 
