@@ -11,7 +11,7 @@ def convert(text):
 def repl(match):
     global ITER
     group = match.group(1)
-    out = f'<a name="p{ITER}"/><div class="page_bar"><a href="#p{ITER}">{group}</a></div>'
+    out = f'<a name="p{ITER}"></a><div class="page_bar"><a href="#p{ITER}">{group}</a></div>'
     ITER = ITER + 1
     return out
 
