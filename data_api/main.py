@@ -6,6 +6,7 @@ import json
 import yaml
 import toml
 import random
+import urllib
 from markdown2 import Markdown
 from airtable import airtable
 from datetime import datetime
@@ -260,10 +261,11 @@ async def gohash(request: Request, dochash: str, db=Depends(get_db)):
     })
 
 
-@app.get("/html/{ecli}", response_class=HTMLResponse)
+@app.get("/doc/{ecli}", response_class=HTMLResponse)
 async def ecli(request: Request, ecli, db=Depends(get_db)):
+    # FIXME: add text output on request ACCEPT
     sql = """
-    SELECT ecli, text, meta->'labels' as labels FROM ecli_document WHERE ecli = $1
+    SELECT id_internal, ecli, text, meta->'labels' as labels FROM ecli_document WHERE ecli = $1
     """
 
     res = await db.fetchrow(sql, ecli)
@@ -277,11 +279,28 @@ async def ecli(request: Request, ecli, db=Depends(get_db)):
     )
     html_text = convert(html_text)
 
+    sql_links = """
+    SELECT target_type, target_identifier, target_label
+    FROM ecli_links
+    WHERE id_internal = $1
+    """
+
+    res2 = await db.fetch(sql_links, res['id_internal'])
+    ecli_links = []
+    eli_links = []
+    for row in res2:
+        if row['target_type'] == 'ecli':
+            ecli_links.append({'name': row['target_label'], 'id': row['target_identifier']})
+        elif row['target_type'] == 'eli':
+            eli_links.append({'name': row['target_label'], 'link': row['target_identifier']})
+
     return templates.TemplateResponse('share.html', {
         'request': request,
         'ecli': res['ecli'],
         'text': html_text,
-        'labels': json.loads(res['labels']) if res['labels'] else []
+        'labels': json.loads(res['labels']) if res['labels'] else [],
+        'elis': eli_links,
+        'eclis': ecli_links,
     })
 
 
