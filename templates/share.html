@@ -250,7 +250,7 @@
       <script type="text/javascript">
         new QRCode(
           document.getElementById("qrcode"), {
-            text: window.location.toString(),
+            text: `${window.location.toString()}#text`,
             width:150,
             height:150,
             correctLevel: QRCode.CorrectLevel.L,
