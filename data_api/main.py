@@ -263,7 +263,7 @@ async def gohash(request: Request, dochash: str, db=Depends(get_db)):
     })
 
 
-@app.get("/doc/{ecli}", response_class=HTMLResponse)
+@app.get("/html/{ecli}", response_class=HTMLResponse)
 async def ecli(request: Request, ecli, db=Depends(get_db)):
     # FIXME: add text output on request ACCEPT
     sql = """
