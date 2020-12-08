@@ -15,6 +15,7 @@ import asyncpg
 import pytz
 import uvicorn
 from fastapi import Depends, FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
@@ -85,6 +86,7 @@ def doc_hash(ecli):
 
 
 app = FastAPI(root_path=config['proxy_prefix'])
+app.mount("/static", StaticFiles(directory="./static"), name="static")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

@@ -1,4 +1,12 @@
 [[package]]
+name = "aiofiles"
+version = "0.6.0"
+description = "File support for asyncio."
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "airtable"
 version = "0.3.1"
 description = "UNKNOWN"
@@ -358,9 +366,13 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "936de349c7948f3d2ad6f2b9007ed755323658cbc025b8aa626d8609b39d4122"
+content-hash = "948dda8e56db49fe559dc28442968ac4fc9ea1de4429d9876dcd7c7c4490d785"
 
 [metadata.files]
+aiofiles = [
+    {file = "aiofiles-0.6.0-py3-none-any.whl", hash = "sha256:bd3019af67f83b739f8e4053c6c0512a7f545b9a8d91aaeab55e6e0f9d123c27"},
+    {file = "aiofiles-0.6.0.tar.gz", hash = "sha256:e0281b157d3d5d59d803e3f4557dcc9a3dff28a4dd4829a9ff478adae50ca092"},
+]
 airtable = [
     {file = "airtable-0.3.1.tar.gz", hash = "sha256:7296119221137ba7b928497e9435f475c0c17554276814d0d41a4cd36e856f64"},
 ]
