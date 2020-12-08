@@ -267,7 +267,10 @@ async def gohash(request: Request, dochash: str, db=Depends(get_db)):
 async def ecli(request: Request, ecli, db=Depends(get_db)):
     # FIXME: add text output on request ACCEPT
     sql = """
-    SELECT id_internal, ecli, text, meta->'labels' as labels FROM ecli_document WHERE ecli = $1
+    SELECT id_internal, ecli, text, meta->'labels' AS labels
+    FROM ecli_document
+    WHERE ecli = $1
+    AND status = 'public'
     """
 
     res = await db.fetchrow(sql, ecli)
