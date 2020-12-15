@@ -92,7 +92,7 @@
                 display:flex;
                 flex-direction:row;
                 justify-content:space-around;
-                width:16rem;
+                width:20rem;
                 font-size:.8em;
                 padding:.3rem 0 .3rem;
                 margin:0;
@@ -239,8 +239,10 @@
               </a>
             </div>
             <ul>
+                <li><a href="https://openjustice.be">About</a></li>
                 <li><a href="mailto:team@openjustice.be">Contact</a></li>
-                <li><a href="https://openjustice.be">Support Us</a></li>
+                <li><a href="https://openjustice.be/innospace/">Support</a></li>
+                <li><a href="https://outil.openjustice.be/">Share a decision</a></li>
             </ul>
         </header>
         <div class="text">
@@ -252,7 +254,7 @@
             <div id="qrcode"> </div>
             <ul class="label">
             {% for label in labels %}
-            <li><small>#</small>{{ label }}</li> 
+            <li><small>#</small>{{ label }}</li>
             {% endfor %}
             </ul>
             {{ text|safe }}
