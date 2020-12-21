@@ -12,7 +12,13 @@ In the future, it should be able to:
 - Allow for updating and management of documents
 
 ## Installation
-Deployment is through docker or poetry
+Clone the repository to your directory of choice:
+```bash
+> git clone https://github.com/openjusticebe/data_api.git
+> cd data_api
+```
+
+Once in the root directory, you can run the API with docker (for testing) or using poetry (for development).
 
 ```bash
 # docker
@@ -39,8 +45,12 @@ These local URI's provide interaction and documentation for the endpoint
 * http://127.0.0.1:5000 for root
 * http://127.0.0.1:5000/docs for OpenAPI documentation
 
+For testing the HTML template (which can be run without a database, see below), a specific endpoint is provided:
+
+* http://127.0.0.1:5000/test
+
 #### Database access
-A database will be needed to provide full functionality. If run in debug mode, the API will
+A database will be needed to provide full functionality. If run in debug mode (with the `--debug` flag), the API will
 launch even if no database can be found.
 
 See the  `ressources/` directory for database schemas (Postgresql >=12).
