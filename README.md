@@ -22,6 +22,11 @@ Deployment is through docker or poetry
 > poetry install
 ```
 
+### Poetry installation
+Poetry installs a local, isolated python environment, to avoid conflicts with your system's python modules. See [here](https://python-poetry.org/docs/).
+
+A recent [python](https://www.python.org/downloads/) version (>=3.7) will also be needed.
+
 ## Usage
 ```bash
 # Run locally in debug mode
