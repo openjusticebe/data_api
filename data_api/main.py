@@ -104,7 +104,14 @@ templates = Jinja2Templates(directory="templates")
 async def startup_event():
     global DB_POOL  # pylint:disable=global-statement
     if os.getenv('NO_ASYNCPG', 'false') == 'false':
-        DB_POOL = await asyncpg.create_pool(**config['postgresql'])
+        try:
+            DB_POOL = await asyncpg.create_pool(**config['postgresql'])
+        except asyncpg.InvalidPasswordError:
+            if config['log_level'] != 'debug':
+                logger.critical("No database found")
+                raise
+            logger.warning("No Database Found !!!! But we're in debug mode, proceeding anyway")
+            DB_POOL = False
 
 
 @app.get("/")
@@ -306,6 +313,21 @@ async def ecli(request: Request, ecli, db=Depends(get_db)):
         'labels': json.loads(res['labels']) if res['labels'] else [],
         'elis': eli_links,
         'eclis': ecli_links,
+    })
+
+
+@app.get("/test", response_class=HTMLResponse)
+def test(request: Request, ):
+    """
+    Simple HTML output simulation
+    """
+    return templates.TemplateResponse('share.html', {
+        'request': request,
+        'ecli': 'test',
+        'text': 'Ceci est un test',
+        'labels': ['test1', 'test2'],
+        'elis': [],
+        'eclis': [],
     })
 
 
