@@ -12,10 +12,28 @@ class ListTypes(str, Enum):
     year = 'year'
     document = 'document'
 
+
 class LanguageTypes(str, Enum):
     FR = 'FR'
     NL = 'NL'
     DE = 'DE'
+
+
+class AppealType(str, Enum):
+    nodata = 'nodata'
+    yes = 'yes'
+    no = 'no'
+
+
+class DocTypeType(str, Enum):
+    eli = 'eli'
+    ecli = 'ecli'
+
+
+class DocLinkType(BaseModel):
+    kind: DocTypeType = Field(..., description='Kind')
+    link: str = Field(..., description='Link / identifier')
+    label: str = Field(..., description='Label')
 
 
 class SubmitModel(BaseModel):
@@ -27,7 +45,9 @@ class SubmitModel(BaseModel):
     identifier: str = Field(..., description="Decision identifier")
     text: str = Field(..., description="Content of document")
     lang: LanguageTypes = Field(..., description="Document Language")
+    appeal: AppealType = Field(..., description="Appeal")
     user_key: str = Field(..., description="User key")
+    doc_links: List[DocLinkType] = Field(..., description="Document links")
     labels: list
     meta: Json = None
 

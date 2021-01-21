@@ -152,11 +152,13 @@ async def create(query: SubmitModel, request: Request, db=Depends(get_db)):
         meta,
         ukey,
         lang,
+        appeal,
         hash
-    ) VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
+    ) VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+    RETURNING id_internal;
     """
 
-    await db.execute(
+    docId = await db.fetchval(
         sql,
         ecli,
         query.country,
@@ -167,6 +169,7 @@ async def create(query: SubmitModel, request: Request, db=Depends(get_db)):
         json.dumps(meta),
         query.user_key,
         query.lang,
+        query.appeal,
         docHash,
     )
 
@@ -176,6 +179,25 @@ async def create(query: SubmitModel, request: Request, db=Depends(get_db)):
         if not check:
             logging.debug("New label : %s", label)
             await db.execute("INSERT INTO labels (label, category) VALUES ($1, 'user_defined')", label)
+
+    # Store doclinks
+    for doc in query.doc_links:
+        sql = """
+            INSERT INTO ecli_links (
+                id_internal,
+                target_type,
+                target_identifier,
+                target_label
+            ) VALUES ($1, $2, $3, $4);
+        """
+
+        await db.execute(
+            sql,
+            docId,
+            doc.kind,
+            doc.link,
+            doc.label,
+        )
 
     logger.debug('Wrote ecli %s ( hash %s ) to database', ecli, docHash)
     return {'result': "ok", 'hash': docHash}
