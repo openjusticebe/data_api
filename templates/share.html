@@ -226,6 +226,25 @@
                   padding:1rem 2rem;
                 }
             }
+
+            #appel {
+                display:inline-block;
+                color:red;
+                font-family: 'Special Elite', 'VT323', 'Volkhov', monospace;
+                font-size:1.2em;
+                border:2px red solid;
+                border-radius:6px;
+                padding:4px 3px 0;
+                margin-top: -4rem;
+                margin-bottom: 2rem;
+                transform:rotate(-5deg);
+                text-align:center;
+            }
+
+            #appel hr {
+              color:red;
+              border-color:red;
+            }
         </style>
     </head>
     <body>
@@ -257,6 +276,13 @@
             <li><small>#</small>{{ label }}</li>
             {% endfor %}
             </ul>
+            {% if appeal == 'yes' %}
+            <div id="appel">
+              Appel interjeté
+              <hr/>
+              Beroep ingedient
+            </div>
+            {% endif %}
             {{ text|safe }}
         </div>
 
