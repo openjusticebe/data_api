@@ -152,11 +152,13 @@ async def create(query: SubmitModel, request: Request, db=Depends(get_db)):
         meta,
         ukey,
         lang,
+        appeal,
         hash
-    ) VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
+    ) VALUES ( $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+    RETURNING id_internal;
     """
 
-    await db.execute(
+    docId = await db.fetchval(
         sql,
         ecli,
         query.country,
@@ -167,6 +169,7 @@ async def create(query: SubmitModel, request: Request, db=Depends(get_db)):
         json.dumps(meta),
         query.user_key,
         query.lang,
+        query.appeal,
         docHash,
     )
 
@@ -176,6 +179,25 @@ async def create(query: SubmitModel, request: Request, db=Depends(get_db)):
         if not check:
             logging.debug("New label : %s", label)
             await db.execute("INSERT INTO labels (label, category) VALUES ($1, 'user_defined')", label)
+
+    # Store doclinks
+    for doc in query.doc_links:
+        sql = """
+            INSERT INTO ecli_links (
+                id_internal,
+                target_type,
+                target_identifier,
+                target_label
+            ) VALUES ($1, $2, $3, $4);
+        """
+
+        await db.execute(
+            sql,
+            docId,
+            doc.kind,
+            doc.link,
+            doc.label,
+        )
 
     logger.debug('Wrote ecli %s ( hash %s ) to database', ecli, docHash)
     return {'result': "ok", 'hash': docHash}
@@ -231,7 +253,9 @@ async def getList(request: Request, db=Depends(get_db), level: ListTypes = 'coun
 @app.get("/hash/{dochash}", response_class=HTMLResponse)
 async def gohash(request: Request, dochash: str, db=Depends(get_db)):
     sql = """
-    SELECT id_internal, ecli, text, meta->'labels' as labels FROM ecli_document WHERE hash = $1
+    SELECT id_internal, ecli, text, appeal, meta->'labels' AS labels
+    FROM ecli_document
+    WHERE hash = $1
     """
 
     res = await db.fetchrow(sql, dochash)
@@ -265,6 +289,7 @@ async def gohash(request: Request, dochash: str, db=Depends(get_db)):
         'ecli': res['ecli'],
         'text': html_text,
         'labels': json.loads(res['labels']) if res['labels'] else [],
+        'appeal': res['appeal'],
         'elis': eli_links,
         'eclis': ecli_links,
     })
@@ -274,7 +299,7 @@ async def gohash(request: Request, dochash: str, db=Depends(get_db)):
 async def ecli(request: Request, ecli, db=Depends(get_db)):
     # FIXME: add text output on request ACCEPT
     sql = """
-    SELECT id_internal, ecli, text, meta->'labels' AS labels
+    SELECT id_internal, ecli, text, appeal, meta->'labels' AS labels
     FROM ecli_document
     WHERE ecli = $1
     AND status = 'public'
@@ -311,6 +336,7 @@ async def ecli(request: Request, ecli, db=Depends(get_db)):
         'ecli': res['ecli'],
         'text': html_text,
         'labels': json.loads(res['labels']) if res['labels'] else [],
+        'appeal': res['appeal'],
         'elis': eli_links,
         'eclis': ecli_links,
     })
