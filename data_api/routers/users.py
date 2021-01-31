@@ -1,17 +1,6 @@
 from fastapi import APIRouter
 
-tags_metadata = [
-    {
-        "name": "users",
-        "description": "Operations related to users"
-    },
-    {
-        "name": "authentication",
-        "description": "Login, logout, etc."
-    }
-]
-
-router = APIRouter(openapi_tags=tags_metadata)
+router = APIRouter()
 
 
 @router.get("/auth/", tags=["authentication"])
