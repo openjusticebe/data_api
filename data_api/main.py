@@ -22,6 +22,8 @@ from starlette.requests import Request
 from fastapi.templating import Jinja2Templates
 from pydantic import Json
 
+from .routers import collections
+
 import data_api.lib_misc as lm
 from data_api.lib_parse import (
     convert
@@ -87,6 +89,7 @@ def doc_hash(ecli):
 
 app = FastAPI(root_path=config['proxy_prefix'])
 app.mount("/static", StaticFiles(directory="./static"), name="static")
+app.include_router(collections.router)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -373,6 +376,22 @@ async def labels(begin, db=Depends(get_db)):
         output.append(row['label'])
 
     return output
+
+
+@app.get("/c/{collection}")
+async def collection(collection, db=Depends(get_db)):
+    """
+    Collection endpoint
+    /c/[collection] lists members of a specific collection, curated by a group of moderators
+
+    Some collections have a specific meaning, and are protected:
+    /c/admin -> list everything
+    /c/review -> latests documents awaiting review
+    ...
+    """
+
+
+
 
 
 # ##################################################################### STARTUP
