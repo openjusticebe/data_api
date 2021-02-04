@@ -38,6 +38,11 @@ class ConfigClass:
             'base_id': os.getenv('AIRTABLE_BASE', ''),
             'api_key': os.getenv('AIRTABLE_API', ''),
         },
+        'auth': {
+            'secret_key': os.getenv('AUTH_KEY', 'be62bbb060280c3955092298ab8ebbb3af0e104cd90cb969bb400e2204280ae4'),
+            'algorithm': 'HS256',
+            'expiration_minutes': 30,
+        },
         'log_level': 'info',
         'salt': os.getenv('SALT', 'OpenJusticePirates'),
         'token': os.getenv('token', 'SomeToken'),

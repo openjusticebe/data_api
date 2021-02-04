@@ -1,9 +1,28 @@
 from datetime import datetime
 from enum import Enum
-from typing import List
+from typing import List, Optional
 
 from pydantic import BaseModel, Field, Json, PositiveInt
 from enum import Enum
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    username: Optional[str] = None
+
+
+class User(BaseModel):
+    email: str
+    valid: Optional[bool] = True
+    username: str
+
+
+class UserInDB(User):
+    hashed_password: str
 
 
 class ListTypes(str, Enum):
