@@ -3,42 +3,36 @@ import argparse
 import logging
 import os
 import toml
-from airtable import airtable
-from datetime import datetime, timedelta
-import yaml
+from datetime import datetime
 
 import asyncpg
 import pytz
 import uvicorn
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from pydantic import Json
-from typing import Optional
-from jose import JWTError, jwt
 
-from .routers import collections, upload
+from .routers import (
+    collections,
+    upload,
+    users,
+)
+
 from .deps import (
     get_db,
     templates,
     logger,
-    verify_password,
 )
-from .lib_cfg import (
-    config,
-)
+from .lib_cfg import (config)
 import data_api.deps as deps
 
 import data_api.lib_misc as lm
 from data_api.models import (
     # ListModel,
     ListTypes,
-    Token,
-    TokenData,
-    User,
 )
 
 
@@ -69,94 +63,19 @@ tags_metadata = [
         "description": "Operations related to the upload of documents"
     },
 ]
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=config.key('token'))
-
-
-def auth_user(username: str, password: str):
-    at = airtable.Airtable(config.key(['airtable', 'base_id']), config.key(['airtable', 'api_key']))
-    res = at.get('Test Users', filter_by_formula="FIND('%s', {Email})=1" % username)
-    try:
-        rec = res['records'][0]['fields']
-        assert verify_password(password, rec['pass'])
-        logger.info("Authentified user %s", rec['Name'])
-        udict = {
-            'email': rec['Email'],
-            'valid': rec['Valid'],
-            'username': rec['Name'],
-        }
-        logger.debug(yaml.dump(rec, indent=2))
-        return User(**udict)
-    except (KeyError, AssertionError):
-        logger.info('Error occured')
-        logger.debug(res)
-        return None
-
-
-def get_user(username: str):
-    at = airtable.Airtable(config.key(['airtable', 'base_id']), config.key(['airtable', 'api_key']))
-    logger.info('Checking for %s in db', username)
-    res = at.get('Test Users', filter_by_formula="FIND('%s', {Email})=1" % username)
-    try:
-        rec = res['records'][0]['fields']
-        udict = {
-            'email': rec['Email'],
-            'valid': rec['Valid'],
-            'username': rec['Name'],
-        }
-        return User(**udict)
-    except (KeyError, AssertionError):
-        return False
-
-
-def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
-    to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(
-        to_encode,
-        config.key(['auth', 'secret_key']),
-        algorithm=config.key(['auth', 'algorithm'])
-    )
-    return encoded_jwt
-
-
-async def get_current_user(token: str = Depends(oauth2_scheme)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = jwt.decode(token, config.key(['auth', 'secret_key']), algorithms=[config.key(['auth', 'algorithm'])])
-        username: str = payload.get("sub")
-        if username is None:
-            raise credentials_exception
-        token_data = TokenData(username=username)
-    except JWTError:
-        raise credentials_exception
-    user = get_user(username=token_data.username)
-    if user is None:
-        raise credentials_exception
-    return user
-
-
-async def get_current_active_user(current_user: User = Depends(get_current_user)):
-    if not current_user.valid:
-        raise HTTPException(status_code=400, detail="Inactive user")
-    return current_user
-
 # ############################################ SERVER ROUTES
 # #############################################################################
 
 
 app = FastAPI(root_path=config.key('proxy_prefix'), openapi_tags=tags_metadata)
 app.mount("/static", StaticFiles(directory="./static"), name="static")
+
+# Include sub routes
+app.include_router(users.router)
 app.include_router(collections.router)
 app.include_router(upload.router)
+
+# Server config
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -231,33 +150,6 @@ def test(request: Request, ):
         'elis': [],
         'eclis': [],
     })
-
-
-@app.post("/token", response_model=Token)
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    """
-    Authentify users
-    """
-    # FIXME: Some other auth provider then airtable would be nice
-    # FIXME: Add support for scopes (like admin, moderatore, ...)
-    # FIXME: Add password hashing support
-    user = auth_user(form_data.username, form_data.password)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Bad username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    access_token_expires = timedelta(minutes=config.key(['auth', 'expiration_minutes']))
-    access_token = create_access_token(
-        data={"sub": user.email}, expires_delta=access_token_expires
-    )
-    return {"access_token": access_token, "token_type": "bearer"}
-
-
-@app.get("/users/me/", response_model=User)
-async def read_users_me(current_user: User = Depends(get_current_active_user)):
-    return current_user
 
 
 # ##################################################################### STARTUP

@@ -1,10 +1,16 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from data_api.models import (
+    User,
+)
+from data_api.auth import (
+    get_current_active_user,
+)
 
 router = APIRouter()
 
 
 @router.get("/c/", tags=["collections"])
-async def read_collections():
+async def read_collections(current_user: User = Depends(get_current_active_user)):
     return []
 
 

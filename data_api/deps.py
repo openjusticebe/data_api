@@ -1,7 +1,6 @@
 import random
 import logging
 from datetime import datetime
-from passlib.context import CryptContext
 from fastapi.templating import Jinja2Templates
 from fastapi import Header, HTTPException
 from .lib_cfg import config
@@ -38,14 +37,3 @@ def doc_hash(ecli):
     nonce = random.randint(0, 99999999)
     num = hex(abs(hash(F"{ecli}{nonce}{config['salt']}{datetime.now()}")))
     return num.lstrip("0x").rstrip("L")
-
-
-pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
-
-
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
-
-
-def get_password_hash(password):
-    return pwd_context.hash(password)
