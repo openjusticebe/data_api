@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.getLevelName('INFO'))
 logger.addHandler(logging.StreamHandler())
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=config.key('token'))
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=config.key('token'), auto_error=False)
 
 
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
@@ -44,6 +44,7 @@ def auth_user(username: str, password: str):
             'email': rec['Email'],
             'valid': rec['Valid'],
             'username': rec['Name'],
+            'admin': True,
         }
         logger.debug(yaml.dump(rec, indent=2))
         return User(**udict)
@@ -63,10 +64,11 @@ def get_user(username: str):
             'email': rec['Email'],
             'valid': rec['Valid'],
             'username': rec['Name'],
+            'admin': True,
         }
         return User(**udict)
     except (KeyError, AssertionError):
-        return False
+        return None
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
@@ -84,12 +86,16 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     return encoded_jwt
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+async def get_current_user(token: Optional[str] = Depends(oauth2_scheme)):
+    if not token:
+        return False
+
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+
     try:
         payload = jwt.decode(token, config.key(['auth', 'secret_key']), algorithms=[config.key(['auth', 'algorithm'])])
         username: str = payload.get("sub")
@@ -105,6 +111,16 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 
 
 async def get_current_active_user(current_user: User = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=400, detail="Could not identify user")
     if not current_user.valid:
         raise HTTPException(status_code=400, detail="Inactive user")
+    return current_user
+
+
+async def get_current_active_user_opt(current_user: Optional[User] = Depends(get_current_user)):
+    if not current_user:
+        return False
+    if not current_user.valid:
+        return False
     return current_user

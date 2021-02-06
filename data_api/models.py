@@ -19,6 +19,7 @@ class User(BaseModel):
     email: str
     valid: Optional[bool] = True
     username: str
+    admin: bool = True
 
 
 class UserInDB(User):
