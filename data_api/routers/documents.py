@@ -4,10 +4,14 @@ from fastapi.responses import HTMLResponse
 from starlette.requests import Request
 from airtable import airtable
 from markdown2 import Markdown
-from data_api.models import (
+from ..models import (
     SubmitModel,
+    User,
 )
-
+from ..auth import (
+    get_current_active_user_opt,
+    credentials_exception,
+)
 from ..deps import (
     config,
     get_db,
@@ -22,7 +26,9 @@ from data_api.lib_parse import (
 router = APIRouter()
 
 
-@router.post("/create", tags=["upload"])
+# ############### CRUD
+# ####################
+@router.post("/create", tags=["crud"])
 async def create(query: SubmitModel, request: Request, db=Depends(get_db)):
     """
     Submit document endpoint
@@ -106,6 +112,32 @@ async def create(query: SubmitModel, request: Request, db=Depends(get_db)):
     return {'result': "ok", 'hash': docHash}
 
 
+@router.get("/d/read/{document_id}", tags=["crud", "auth"])
+async def read(
+        document_id: int,
+        current_user: User = Depends(get_current_active_user_opt),
+        db=Depends(get_db)):
+    """
+    Access to every detail about a document, so it contents
+    can be reviewed, edited and validated.
+
+    Admin user access required
+    """
+    if not current_user.admin:
+        raise credentials_exception
+
+    sql = """
+    SELECT *
+    FROM ecli_document
+    WHERE id_internal = $1
+    """
+
+    res = await db.fetchrow(sql, document_id)
+    return dict(res)
+
+
+# ############# ACCESS
+# ####################
 @router.get("/hash/{dochash}", response_class=HTMLResponse, tags=["upload"])
 async def gohash(request: Request, dochash: str, db=Depends(get_db)):
     sql = """

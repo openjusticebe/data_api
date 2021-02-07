@@ -17,7 +17,7 @@ from pydantic import Json
 
 from .routers import (
     collections,
-    upload,
+    documents,
     users,
 )
 
@@ -62,6 +62,14 @@ tags_metadata = [
         "name": "upload",
         "description": "Operations related to the upload of documents"
     },
+    {
+        "name": "crud",
+        "description": "Operations related to the creation, reading, update and deletion of documents (on a management level)"
+    },
+    {
+        "name": "auth",
+        "description": "Authentication may be required to access this endpoint"
+    },
 ]
 # ############################################ SERVER ROUTES
 # #############################################################################
@@ -73,7 +81,7 @@ app.mount("/static", StaticFiles(directory="./static"), name="static")
 # Include sub routes
 app.include_router(users.router)
 app.include_router(collections.router)
-app.include_router(upload.router)
+app.include_router(documents.router)
 
 # Server config
 app.add_middleware(

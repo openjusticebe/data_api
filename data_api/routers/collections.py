@@ -4,6 +4,7 @@ from ..models import (
 )
 from ..auth import (
     get_current_active_user_opt,
+    credentials_exception,
 )
 from ..deps import (
     # config,
@@ -12,11 +13,6 @@ from ..deps import (
 )
 
 router = APIRouter()
-credentials_exception = HTTPException(
-    status_code=status.HTTP_401_UNAUTHORIZED,
-    detail="Could not validate credentials",
-    headers={"WWW-Authenticate": "Bearer"},
-)
 bad_request = HTTPException(
     status_code=status.HTTP_400_BAD_REQUEST,
     detail="Bad Request"
@@ -46,7 +42,6 @@ class Collections:
         return [dict(r) for r in res]
 
 
-
 # ##################################### ROUTES
 # ############################################
 @router.get("/c/", tags=["collections"])
@@ -54,7 +49,7 @@ async def read_collections(current_user: User = Depends(get_current_active_user_
     return []
 
 
-@router.get("/c/{collection}", tags=["collections"])
+@router.get("/c/{collection}", tags=["collections", "auth"])
 async def read_collection(
         collection: str,
         current_user: User = Depends(get_current_active_user_opt),
