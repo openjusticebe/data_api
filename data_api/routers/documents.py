@@ -127,13 +127,41 @@ async def read(
         raise credentials_exception
 
     sql = """
-    SELECT *
+    SELECT
+        id_internal as id,
+        ecli,
+        country,
+        year,
+        identifier,
+        text,
+        meta->'labels' as labels,
+        flags,
+        date_created,
+        lang,
+        appeal,
+        status
     FROM ecli_document
     WHERE id_internal = $1
     """
 
-    res = await db.fetchrow(sql, document_id)
-    return dict(res)
+    doc_raw = await db.fetchrow(sql, document_id)
+    doc_data = dict(doc_raw)
+    doc_data['labels'] = [] if doc_data['labels'] is None else json.loads(doc_data['labels'])
+
+    sql = """
+    SELECT
+        target_type as kind,
+        target_identifier as link,
+        target_label as label
+    FROM ecli_links
+    WHERE id_internal = $1
+    """
+    links_raw = await db.fetch(sql, document_id)
+    links = [dict(x) for x in links_raw]
+
+    doc_data['links'] = links
+
+    return doc_data
 
 
 # ############# ACCESS

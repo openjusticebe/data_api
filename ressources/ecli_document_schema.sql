@@ -37,6 +37,7 @@ CREATE TABLE "ecli_links" (
     target_identifier TEXT,
     target_label TEXT
 );
+
 ALTER TABLE ecli_links ADD PRIMARY KEY (id_internal, target_identifier);
 CREATE INDEX ecli_links_idx ON "ecli_links" (id_internal, target_identifier);
 CREATE INDEX ecli_parts ON "ecli_document" (country, court, year, identifier);
