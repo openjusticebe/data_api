@@ -5,6 +5,7 @@ from starlette.requests import Request
 from airtable import airtable
 from markdown2 import Markdown
 from ..models import (
+    UpdateModel,
     SubmitModel,
     User,
 )
@@ -131,6 +132,7 @@ async def read(
         id_internal as id,
         ecli,
         country,
+        court,
         year,
         identifier,
         text,
@@ -162,6 +164,86 @@ async def read(
     doc_data['links'] = links
 
     return doc_data
+
+
+@router.post("/d/update/{document_id}", tags=["crud", "auth"])
+async def update(
+        document_id: int,
+        query: UpdateModel,
+        current_user: User = Depends(get_current_active_user_opt),
+        db=Depends(get_db)):
+    """
+    Update document endpoint
+    """
+    print("Update query received for document %s" % document_id)
+    print(query)
+
+    ecli = f"ECLI:{query.country}:{query.court}:{query.year}:{query.identifier}"
+
+    meta = query.meta if query.meta is not None else {}
+    meta['labels'] = query.labels
+
+    sql = """
+    UPDATE ecli_document
+    SET
+        ecli = $2,
+        country = $3,
+        court = $4,
+        year = $5,
+        identifier = $6,
+        text = $7,
+        meta = $8,
+        lang = $9,
+        appeal = $10
+    WHERE id_internal = $1
+    """
+
+    await db.execute(
+        sql,
+        document_id,
+        ecli,
+        query.country,
+        query.court,
+        query.year,
+        query.identifier,
+        query.text,
+        json.dumps(meta),
+        query.lang,
+        query.appeal,
+    )
+
+    # Keep labels in database for reuse
+    for label in query.labels:
+        check = await db.fetchrow("SELECT 'one' FROM labels WHERE label = $1", label)
+        if not check:
+            logger.debug("New label : %s", label)
+            await db.execute("INSERT INTO labels (label, category) VALUES ($1, 'user_defined')", label)
+
+    # Store doclinks
+    logger.debug("Removing doclinks for %s", document_id)
+    await db.execute("DELETE FROM ecli_links WHERE id_internal = $1", document_id)
+    logger.debug("Reinserting doclinks for %s", document_id)
+
+    for doc in query.doc_links:
+        sql = """
+            INSERT INTO ecli_links (
+                id_internal,
+                target_type,
+                target_identifier,
+                target_label
+            ) VALUES ($1, $2, $3, $4);
+        """
+
+        await db.execute(
+            sql,
+            document_id,
+            doc.kind,
+            doc.link,
+            doc.label,
+        )
+
+    # logger.debug('Wrote ecli %s ( hash %s ) to database', ecli, docHash)
+    return {'result': "ok"}
 
 
 # ############# ACCESS
