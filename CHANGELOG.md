@@ -10,6 +10,7 @@ and to the [CHANGELOG recommendations](http://keepachangelog.com/).
 ### [4] - (2020-01-21)
 - refactoring code, using routes to separate functionnality
 - adding OAuth support for authenticating users
+- added interfaces for reviewing and updating content
 
 ### [3] - (2020-01-21)
 - support for appeal indicator
