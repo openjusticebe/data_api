@@ -23,6 +23,7 @@ bad_request = HTTPException(
 
 class Collections:
     NEW = 'new'
+    PUBLIC = 'public'
 
     @staticmethod
     async def review(user, db):
@@ -30,6 +31,14 @@ class Collections:
             raise credentials_exception
         record = await Collections._by_status(Collections.NEW, db)
         return record
+
+    @staticmethod
+    async def public(user, db):
+        if not user.admin:
+            raise credentials_exception
+        record = await Collections._by_status(Collections.PUBLIC, db)
+        return record
+
 
     @staticmethod
     async def _by_status(state, db):
