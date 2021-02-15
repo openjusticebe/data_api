@@ -39,6 +39,14 @@ class LanguageTypes(str, Enum):
     DE = 'DE'
 
 
+class StatusTypes(str, Enum):
+    NEW = 'new'
+    PUBLIC = 'public'
+    HIDDEN = 'hidden'
+    FLAGGED = 'flagged'
+    DELETED = 'deleted'
+
+
 class AppealType(str, Enum):
     nodata = 'nodata'
     yes = 'yes'
@@ -98,6 +106,7 @@ class UpdateModel(BaseModel):
     text: str = Field(..., description="Content of document")
     lang: LanguageTypes = Field(..., description="Document Language")
     appeal: AppealType = Field(..., description="Appeal")
+    status: StatusTypes = Field(..., description="Status")
     doc_links: List[DocLinkType] = Field(..., description="Document links")
     labels: list
     meta: Json = None
@@ -113,6 +122,7 @@ class UpdateModel(BaseModel):
                 'identifier': '999.999',
                 'text': 'Lorem Ipsum ...',
                 'lang': 'NL',
+                'status': 'flagged',
                 'labels': [],
                 'meta': '{}',
             }}

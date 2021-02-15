@@ -24,6 +24,9 @@ bad_request = HTTPException(
 class Collections:
     NEW = 'new'
     PUBLIC = 'public'
+    HIDDEN = 'hidden'
+    FLAGGED = 'flagged'
+    DELETED = 'deleted'
 
     @staticmethod
     async def review(user, db):
@@ -39,6 +42,26 @@ class Collections:
         record = await Collections._by_status(Collections.PUBLIC, db)
         return record
 
+    @staticmethod
+    async def hidden(user, db):
+        if not user.admin:
+            raise credentials_exception
+        record = await Collections._by_status(Collections.HIDDEN, db)
+        return record
+
+    @staticmethod
+    async def flagged(user, db):
+        if not user.admin:
+            raise credentials_exception
+        record = await Collections._by_status(Collections.FLAGGED, db)
+        return record
+
+    @staticmethod
+    async def deleted(user, db):
+        if not user.admin:
+            raise credentials_exception
+        record = await Collections._by_status(Collections.DELETED, db)
+        return record
 
     @staticmethod
     async def _by_status(state, db):

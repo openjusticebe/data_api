@@ -4,6 +4,7 @@ from fastapi.responses import HTMLResponse
 from starlette.requests import Request
 from airtable import airtable
 from markdown2 import Markdown
+from datetime import datetime
 from ..models import (
     UpdateModel,
     SubmitModel,
@@ -141,7 +142,9 @@ async def read(
         date_created,
         lang,
         appeal,
-        status
+        status,
+        date_created,
+        date_updated
     FROM ecli_document
     WHERE id_internal = $1
     """
@@ -194,7 +197,9 @@ async def update(
         text = $7,
         meta = $8,
         lang = $9,
-        appeal = $10
+        appeal = $10,
+        status = $11,
+        date_updated = $12
     WHERE id_internal = $1
     """
 
@@ -210,6 +215,8 @@ async def update(
         json.dumps(meta),
         query.lang,
         query.appeal,
+        query.status,
+        datetime.now()
     )
 
     # Keep labels in database for reuse
