@@ -69,6 +69,7 @@ class Collections:
         SELECT id_internal as id, ecli, status, appeal, meta, lang, date_created, date_updated
         FROM ecli_document
         WHERE status = $1
+        ORDER BY date_created ASC
         """
         res = await db.fetch(sql, state)
         return [dict(r) for r in res]
@@ -81,7 +82,7 @@ async def read_collections(current_user: User = Depends(get_current_active_user_
     return []
 
 
-@router.get("/c/{collection}", tags=["collections", "auth"])
+@router.get("/c/{collection}", tags=["collections"])
 async def read_collection(
         collection: str,
         current_user: User = Depends(get_current_active_user_opt),

@@ -6,10 +6,12 @@ It offers a Rest API, documented via OpenAPI, and some document display abilitie
 This API can already :
 - Create a new document
 - Access and display a document through personal or public links
+- Allow for updating and management of documents
+- Allow login/logout for administrators, moderators and users
+- Provide access to collections of documents
 
 In the future, it should be able to:
 - Provide search
-- Allow for updating and management of documents
 
 ## Installation
 Clone the repository to your directory of choice:
@@ -64,7 +66,6 @@ See `config_default.toml` file to create a local `config.toml` file for the API 
 ```
 
 ## Roadmap
-1. Provide full support for the OpenJustice data interactions
 2. Move HTML rendering to API clients (no need for html templates in this api)
 3. Add search !
 

@@ -114,7 +114,7 @@ async def create(query: SubmitModel, request: Request, db=Depends(get_db)):
     return {'result': "ok", 'hash': docHash}
 
 
-@router.get("/d/read/{document_id}", tags=["crud", "auth"])
+@router.get("/d/read/{document_id}", tags=["crud"])
 async def read(
         document_id: int,
         current_user: User = Depends(get_current_active_user_opt),
@@ -143,6 +143,7 @@ async def read(
         lang,
         appeal,
         status,
+        hash,
         date_created,
         date_updated
     FROM ecli_document
@@ -169,7 +170,7 @@ async def read(
     return doc_data
 
 
-@router.post("/d/update/{document_id}", tags=["crud", "auth"])
+@router.post("/d/update/{document_id}", tags=["crud"])
 async def update(
         document_id: int,
         query: UpdateModel,
@@ -255,8 +256,8 @@ async def update(
 
 # ############# ACCESS
 # ####################
-@router.get("/hash/{dochash}", response_class=HTMLResponse, tags=["upload"])
-async def gohash(request: Request, dochash: str, db=Depends(get_db)):
+@router.get("/hash/{dochash}", response_class=HTMLResponse, tags=["access"])
+async def view_html_hash(request: Request, dochash: str, db=Depends(get_db)):
     sql = """
     SELECT id_internal, ecli, text, appeal, meta->'labels' AS labels
     FROM ecli_document
@@ -300,8 +301,8 @@ async def gohash(request: Request, dochash: str, db=Depends(get_db)):
     })
 
 
-@router.get("/html/{ecli}", response_class=HTMLResponse, tags=["upload"])
-async def ecli(request: Request, ecli, db=Depends(get_db)):
+@router.get("/html/{ecli}", response_class=HTMLResponse, tags=["access"])
+async def view_html_ecli(request: Request, ecli, db=Depends(get_db)):
     # FIXME: add text output on request ACCEPT
     sql = """
     SELECT id_internal, ecli, text, appeal, meta->'labels' AS labels
@@ -347,7 +348,7 @@ async def ecli(request: Request, ecli, db=Depends(get_db)):
     })
 
 
-@router.get("/labels/{begin}", tags=["upload"])
+@router.get("/labels/{begin}", tags=["crud"])
 async def labels(begin, db=Depends(get_db)):
     """
     Return matching labels (only search from beginning of string)

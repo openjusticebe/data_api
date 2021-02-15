@@ -15,10 +15,12 @@ from data_api.auth import (
 router = APIRouter()
 
 
-@router.post("/token", response_model=Token)
+@router.post("/token", response_model=Token, tags=["authentication"])
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     """
-    Authentify users
+    Submit username/password form to this endpoint to obtain auth token
+
+    The obtained token must be used as bearer auth in the authentication headers.
     """
     # FIXME: Some other auth provider then airtable would be nice
     # FIXME: Add support for scopes (like admin, moderatore, ...)
@@ -41,9 +43,9 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 # async def read_users_me(current_user: User = Depends(get_current_active_user)):
 #     return current_user
 
-@router.get("/auth/", tags=["authentication"])
-async def auth():
-    return []
+# @router.get("/auth/", tags=["authentication"])
+# async def auth():
+#     return []
 
 
 @router.get("/u/", tags=["users"])
@@ -52,7 +54,10 @@ async def read_users():
 
 
 @router.get("/u/me", response_model=User, tags=["users"])
-async def read_users_me(current_user: User = Depends(get_current_active_user)):
+async def read_user_me(current_user: User = Depends(get_current_active_user)):
+    """
+    Read data from connected user
+    """
     return current_user
 
 

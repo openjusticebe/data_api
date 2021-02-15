@@ -47,6 +47,14 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 tags_metadata = [
     {
+        "name": "access",
+        "description": "View and read documents"
+    },
+    {
+        "name": "collections",
+        "description": "Operations on collections (restriction may apply)"
+    },
+    {
         "name": "users",
         "description": "Operations related to users"
     },
@@ -55,20 +63,8 @@ tags_metadata = [
         "description": "Login, logout, etc."
     },
     {
-        "name": "collections",
-        "description": "Operations on collections, depending authentified user"
-    },
-    {
-        "name": "upload",
-        "description": "Operations related to the upload of documents"
-    },
-    {
         "name": "crud",
         "description": "Operations related to the creation, reading, update and deletion of documents (on a management level)"
-    },
-    {
-        "name": "auth",
-        "description": "Authentication may be required to access this endpoint"
     },
 ]
 # ############################################ SERVER ROUTES
@@ -114,7 +110,7 @@ def root():
     return lm.status_get(START_TIME, VERSION)
 
 
-@app.get("/list")
+@app.get("/list", tags=["access"])
 async def getList(request: Request, db=Depends(get_db), level: ListTypes = 'country', data: Json = {}):
     """
     List available data according to query
