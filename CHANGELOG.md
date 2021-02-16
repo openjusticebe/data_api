@@ -7,6 +7,16 @@ This project adheres to [Semantic Versioning](http://semver.org/)
 and to the [CHANGELOG recommendations](http://keepachangelog.com/).
 ## Alpha Development
 
+### [4] - (2020-01-21)
+- refactoring code, using routes to separate functionnality
+- adding OAuth support for authenticating users
+- added interfaces for reviewing and updating content
+
+### [3] - (2020-01-21)
+- support for appeal indicator
+- support for upload of document links (doclink)
+- switch to single version indicator
+
 ### [0.2.1] - (2020-12-01)
 - added labels endpoint
 - added labels database schema
