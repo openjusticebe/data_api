@@ -69,7 +69,26 @@ def get_user(username: str):
         udict = {
             'email': rec['Email'],
             'valid': rec['Valid'],
-            'username': rec['Name'],
+            'name': rec['Name'],
+            'admin': True,
+        }
+        return User(**udict)
+    except (KeyError, AssertionError):
+        return None
+
+
+def get_user_by_key(user_key: str):
+    at = airtable.Airtable(config.key(['airtable', 'base_id']), config.key(['airtable', 'api_key']))
+    res = at.get('Test Users', filter_by_formula="FIND('%s', {Key})=1" % user_key)
+
+    print(user_key)
+    print(res)
+    try:
+        rec = res['records'][0]['fields']
+        udict = {
+            'email': rec['Email'],
+            'valid': rec['Valid'],
+            'name': rec['Name'],
             'admin': True,
         }
         return User(**udict)

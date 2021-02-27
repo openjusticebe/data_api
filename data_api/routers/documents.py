@@ -2,7 +2,6 @@ import json
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import HTMLResponse
 from starlette.requests import Request
-from airtable import airtable
 from markdown2 import Markdown
 from datetime import datetime
 from ..models import (
@@ -13,9 +12,9 @@ from ..models import (
 from ..auth import (
     get_current_active_user_opt,
     credentials_exception,
+    get_user_by_key,
 )
 from ..deps import (
-    config,
     get_db,
     logger,
     doc_hash,
@@ -37,15 +36,13 @@ async def create(query: SubmitModel, request: Request, db=Depends(get_db)):
     """
     logger.info('Testing user key %s', query.user_key)
     # FIXME : Fix airtable key checking
-    at = airtable.Airtable(config.key(['airtable', 'base_id']), config.key(['airtable', 'api_key']))
-    res = at.get('Test Users', filter_by_formula="FIND('%s', {Key})=1" % query.user_key)
-    ecli = f"ECLI:{query.country}:{query.court}:{query.year}:{query.identifier}"
+    rec = get_user_by_key(query.user_key)
 
-    if res and 'records' in res and len(res['records']) == 1:
-        rec = res['records'][0]['fields']
-        logger.info("User %s / %s submitting text %s", rec['Name'], rec['Email'], ecli)
-    else:
+    if not rec:
         raise HTTPException(status_code=401, detail="bad user key")
+
+    ecli = f"ECLI:{query.country}:{query.court}:{query.year}:{query.identifier}"
+    logger.info("User %s / %s submitting text %s", rec['username'], rec['email'], ecli)
 
     meta = query.meta if query.meta is not None else {}
     meta['labels'] = query.labels
@@ -145,14 +142,36 @@ async def read(
         status,
         hash,
         date_created,
-        date_updated
+        date_updated,
+        ukey
     FROM ecli_document
     WHERE id_internal = $1
     """
 
     doc_raw = await db.fetchrow(sql, document_id)
-    doc_data = dict(doc_raw)
-    doc_data['labels'] = [] if doc_data['labels'] is None else json.loads(doc_data['labels'])
+    user = get_user_by_key(doc_raw['ukey'])
+    if not user:
+        raise RuntimeError('Could not find user with key %s', doc_raw['ukey'])
+
+    doc_data = {
+        'id': doc_raw['id'],
+        'ecli': doc_raw['ecli'],
+        'country': doc_raw['country'],
+        'court': doc_raw['court'],
+        'year': doc_raw['year'],
+        'identifier': doc_raw['identifier'],
+        'text': doc_raw['text'],
+        'labels': [] if doc_raw['labels'] is None else json.loads(doc_raw['labels']),
+        'flags': doc_raw['flags'],
+        'lang': doc_raw['lang'],
+        'appeal': doc_raw['appeal'],
+        'status': doc_raw['status'],
+        'hash': doc_raw['hash'],
+        'date_created': doc_raw['date_created'],
+        'date_updated': doc_raw['date_updated'],
+        'usermail': user.email,
+        'username': user.name,
+    }
 
     sql = """
     SELECT
