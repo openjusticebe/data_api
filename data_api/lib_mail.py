@@ -49,7 +49,7 @@ def send_mail(mTo, mSubject, mBody):
 
     message = MIMEMultipart()
     message['Subject'] = mSubject
-    message['From'] = mFrom
+    message['From'] = "noreply@openjustice.be"
     message['To'] = mTo
 
     message.attach(MIMEText(mBody, "html"))
