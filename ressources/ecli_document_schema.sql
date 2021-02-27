@@ -24,8 +24,11 @@ CREATE TABLE "ecli_document" (
     appeal appeal_enum DEFAULT 'nodata',
     meta JSONB,
     flags TEXT[],
+    views_hash INT DEFAULT 0,
+    views_public INT DEFAULT 0,
     ukey TEXT,
     lang VARCHAR(2),
+    
     status status_enum DEFAULT 'new',
     date_created TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     date_updated TIMESTAMP WITH TIME ZONE

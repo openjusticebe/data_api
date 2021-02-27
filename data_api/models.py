@@ -18,7 +18,7 @@ class TokenData(BaseModel):
 class User(BaseModel):
     email: str
     valid: Optional[bool] = True
-    name: str
+    username: str
     admin: bool = True
 
 

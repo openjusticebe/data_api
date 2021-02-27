@@ -14,10 +14,9 @@ from data_api.models import (
     TokenData,
     User,
 )
-
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.getLevelName('INFO'))
-logger.addHandler(logging.StreamHandler())
+from .deps import (
+    logger
+)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=config.key('token'), auto_error=False)
 
@@ -69,7 +68,7 @@ def get_user(username: str):
         udict = {
             'email': rec['Email'],
             'valid': rec['Valid'],
-            'name': rec['Name'],
+            'username': rec['Name'],
             'admin': True,
         }
         return User(**udict)
@@ -80,15 +79,12 @@ def get_user(username: str):
 def get_user_by_key(user_key: str):
     at = airtable.Airtable(config.key(['airtable', 'base_id']), config.key(['airtable', 'api_key']))
     res = at.get('Test Users', filter_by_formula="FIND('%s', {Key})=1" % user_key)
-
-    print(user_key)
-    print(res)
     try:
         rec = res['records'][0]['fields']
         udict = {
             'email': rec['Email'],
             'valid': rec['Valid'],
-            'name': rec['Name'],
+            'username': rec['Name'],
             'admin': True,
         }
         return User(**udict)
@@ -114,13 +110,15 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
 async def get_current_user(token: Optional[str] = Depends(oauth2_scheme)):
     if not token:
         return False
+    return decode_token(token)
 
+
+def decode_token(token):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-
     try:
         payload = jwt.decode(token, config.key(['auth', 'secret_key']), algorithms=[config.key(['auth', 'algorithm'])])
         username: str = payload.get("sub")

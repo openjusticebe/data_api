@@ -1,9 +1,10 @@
 import json
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from starlette.requests import Request
 from markdown2 import Markdown
 from datetime import datetime
+from data_api.lib_cfg import config
 from ..models import (
     UpdateModel,
     SubmitModel,
@@ -11,6 +12,7 @@ from ..models import (
 )
 from ..auth import (
     get_current_active_user_opt,
+    decode_token,
     credentials_exception,
     get_user_by_key,
 )
@@ -20,6 +22,7 @@ from ..deps import (
     doc_hash,
     templates,
 )
+from ..lib_mail import notify
 from data_api.lib_parse import (
     convert
 )
@@ -42,7 +45,7 @@ async def create(query: SubmitModel, request: Request, db=Depends(get_db)):
         raise HTTPException(status_code=401, detail="bad user key")
 
     ecli = f"ECLI:{query.country}:{query.court}:{query.year}:{query.identifier}"
-    logger.info("User %s / %s submitting text %s", rec['username'], rec['email'], ecli)
+    logger.info("User %s / %s submitting text %s", rec.username, rec.email, ecli)
 
     meta = query.meta if query.meta is not None else {}
     meta['labels'] = query.labels
@@ -107,6 +110,7 @@ async def create(query: SubmitModel, request: Request, db=Depends(get_db)):
             doc.label,
         )
 
+    notify(rec, 'create_doc', {'doc_hash': docHash})
     logger.debug('Wrote ecli %s ( hash %s ) to database', ecli, docHash)
     return {'result': "ok", 'hash': docHash}
 
@@ -143,7 +147,9 @@ async def read(
         hash,
         date_created,
         date_updated,
-        ukey
+        ukey,
+        views_hash,
+        views_public
     FROM ecli_document
     WHERE id_internal = $1
     """
@@ -170,7 +176,9 @@ async def read(
         'date_created': doc_raw['date_created'],
         'date_updated': doc_raw['date_updated'],
         'usermail': user.email,
-        'username': user.name,
+        'username': user.username,
+        'vhash': doc_raw['views_hash'],
+        'vpublic': doc_raw['views_public'],
     }
 
     sql = """
@@ -198,13 +206,16 @@ async def update(
     """
     Update document endpoint
     """
-    print("Update query received for document %s" % document_id)
-    print(query)
+    logger.info("Update query received for document %s" % document_id)
 
     ecli = f"ECLI:{query.country}:{query.court}:{query.year}:{query.identifier}"
 
     meta = query.meta if query.meta is not None else {}
     meta['labels'] = query.labels
+
+    old_status = await db.fetchval(
+        "SELECT status FROM ecli_document WHERE id_internal = $1",
+        document_id)
 
     sql = """
     UPDATE ecli_document
@@ -269,6 +280,13 @@ async def update(
             doc.label,
         )
 
+    if old_status != query.status and query.status == 'public':
+        ukey = await db.fetchval(
+            "SELECT ukey FROM ecli_document WHERE id_internal = $1",
+            document_id)
+        user = get_user_by_key(ukey)
+        notify(user, 'publish_doc', {'ecli': ecli})
+
     # logger.debug('Wrote ecli %s ( hash %s ) to database', ecli, docHash)
     return {'result': "ok"}
 
@@ -276,9 +294,32 @@ async def update(
 # ############# ACCESS
 # ####################
 @router.get("/hash/{dochash}", response_class=HTMLResponse, tags=["access"])
-async def view_html_hash(request: Request, dochash: str, db=Depends(get_db)):
+async def view_html_hash(
+        request: Request,
+        dochash: str,
+        db=Depends(get_db),
+        t: str = ''):
+
+    """
+    Access document with hash
+    - If user is admin (token is provided and valid) : show document
+    - If doc is published, redirect
+    - If doc is hidden or new, and views level is ok : show document
+    - Return error (access denied)
+    """
+
+    is_admin = False
+
+    if t != '':
+        try:
+            user = decode_token(t)
+            is_admin = user.admin
+        except Exception as e:
+            logger.warning("User hash Token error")
+            logger.exception(e)
+
     sql = """
-    SELECT id_internal, ecli, text, appeal, meta->'labels' AS labels
+    SELECT id_internal, ecli, text, appeal, meta->'labels' AS labels, views_hash, status
     FROM ecli_document
     WHERE hash = $1
     """
@@ -287,6 +328,20 @@ async def view_html_hash(request: Request, dochash: str, db=Depends(get_db)):
 
     if not res:
         raise HTTPException(status_code=404, detail="Document not found")
+
+    if not is_admin:
+        if res['status'] == 'public':
+            ecli = res['ecli']
+            return RedirectResponse(url=f'/html/{ecli}')
+        if res['status'] == 'deleted':
+            raise HTTPException(status_code=404, detail="Document not found")
+        if res['status'] not in ('new', 'hidden'):
+            raise HTTPException(status_code=423, detail="Content is locked")
+        if res['views_hash'] > config.key('hash_max_views'):
+            raise HTTPException(status_code=423, detail="Content is locked")
+        await db.execute("UPDATE ecli_document SET views_hash = views_hash + 1 WHERE hash = $1", dochash)
+    else:
+        logger.info("Admin View enabled for %s", dochash)
 
     markdowner = Markdown()
     html_text = markdowner.convert(
@@ -355,6 +410,8 @@ async def view_html_ecli(request: Request, ecli, db=Depends(get_db)):
             ecli_links.append({'name': row['target_label'], 'id': row['target_identifier']})
         elif row['target_type'] == 'eli':
             eli_links.append({'name': row['target_label'], 'link': row['target_identifier']})
+
+    await db.execute("UPDATE ecli_document SET views_public = views_public + 1 WHERE ecli = $1", ecli)
 
     return templates.TemplateResponse('share.html', {
         'request': request,

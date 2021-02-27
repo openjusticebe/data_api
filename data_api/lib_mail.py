@@ -1,42 +1,55 @@
+from smtplib import SMTP
 from .lib_cfg import (config)
 from .deps import (
-    templates
+    logger,
+    jinjaEnv
 )
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from collections import namedTuple
+from collections import namedtuple
+import logging
 
-Tpl = namedTuple('Tpl', ['file', 'subject', 'variables'])
+Tpl = namedtuple('Tpl', ['file', 'subject', 'variables'])
 
 TEMPLATE_CONFIG = {
     # User created new document
     'create_doc': Tpl(
         'mail_doc_create.html',
-        'Nouveau fichier / Nieuw document',
+        'Notif: Nouveau document / Nieuw document',
         ['username', 'doc_hash', 'doc_domain']
-    )
+    ),
+    'publish_doc': Tpl(
+        'mail_doc_publish.html',
+        'Notif: Document publié / Document gepubliceerd',
+        ['username', 'ecli', 'doc_domain']
+    ),
 }
 
 
 def notify(user, templateName, data):
     try:
-        tp = TEMPLATE_CONFIG[templateName])
-        body = templates.templateResponse( tp.file, {
+        tp = TEMPLATE_CONFIG[templateName]
+        template = jinjaEnv.get_template(tp.file)
+        body = template.render({
             **data,
-            'username': user.name,
+            'username': user.username,
             'subject': tp.subject,
             'doc_domain': config.key('oj_doc_domain'),
         })
-        send_mail(user.mail, tp.subject, body)
+        send_mail(user.email, tp.subject, body)
+        print("notification mail %s sent" % templateName)
+        logger.info("notification mail %s sent", templateName)
     except Exception as e:
-        logger.warning("Failed to send notification type %s to $s", templateName, user.name)
+        logger.warning("Failed to send notification type %s to %s", templateName, user.username)
         logger.exception(e)
 
 
 def send_mail(mTo, mSubject, mBody):
+    mFrom = config.key(['smtp', 'user'])
+
     message = MIMEMultipart()
     message['Subject'] = mSubject
-    message['From'] = config.key(['smtp' ,'user'])]
+    message['From'] = mFrom
     message['To'] = mTo
 
     message.attach(MIMEText(mBody, "html"))
