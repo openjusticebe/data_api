@@ -10,6 +10,7 @@ from collections import namedtuple
 import logging
 
 Tpl = namedtuple('Tpl', ['file', 'subject', 'variables'])
+OJ_ENV = config.key('oj_env')
 
 TEMPLATE_CONFIG = {
     # User created new document
@@ -36,9 +37,9 @@ def notify(user, templateName, data):
             'subject': tp.subject,
             'doc_domain': config.key('oj_doc_domain'),
         })
-        send_mail(user.email, tp.subject, body)
-        print("notification mail %s sent" % templateName)
-        logger.info("notification mail %s sent", templateName)
+        subject = tp.subject if OJ_ENV == 'prod' else f"[{OJ_ENV}] {tp.subject}"
+        send_mail(user.email, subject, body)
+        logger.info("notification mail \'%s\' sent", subject)
     except Exception as e:
         logger.warning("Failed to send notification type %s to %s", templateName, user.username)
         logger.exception(e)

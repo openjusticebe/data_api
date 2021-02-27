@@ -51,6 +51,7 @@ class ConfigClass:
         'salt': os.getenv('SALT', 'OpenJusticePirates'),
         'token': os.getenv('token', 'SomeToken'),
         'oj_doc_domain': os.getenv('DOC_URI', 'http://localhost:5005'),
+        'oj_env': os.getenv('OJ_ENV', 'development'),
         'hash_max_views': os.getenv('HASH_VIEWS', 1000),
     }
 
