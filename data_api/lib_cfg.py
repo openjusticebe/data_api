@@ -43,9 +43,16 @@ class ConfigClass:
             'algorithm': 'HS256',
             'expiration_minutes': 30,
         },
+        'smtp': {
+            'host': os.getenv('SMTP_HOST', 'localhost'),
+            'user': os.getenv('SMTP_USER', 'user'),
+            'port': os.getenv('SMTP_PORT', 'port'),
+            'password': os.getenv('SMTP_PASSWORD', 'password'),
+        },
         'log_level': 'info',
         'salt': os.getenv('SALT', 'OpenJusticePirates'),
         'token': os.getenv('token', 'SomeToken'),
+        'oj_doc_domain': os.getenv('DOC_URI', 'http://localhost:5005')
     }
 
     def merge(self, cfg):

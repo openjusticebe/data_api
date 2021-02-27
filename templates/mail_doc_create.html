@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>   
+  <title>{{ subject }}</title>  
+</head>
+<body>
+    <div id="f72h_author">
+     Beste, Cher {{ username }}
+    </div>
+    <div id="f72h_content">
+      <p>
+        Ceci est un mail automatique généré par openjustice.be</br>
+        Dit is een automatische e-mail gegenereerd door openjustice.be 
+      </p>
+      <p>
+        Nous confirmons la bonne réception du document déposé, qui sera traité prochainement.
+        En attendant il vous est possible de le consulter temporairement à l'adresse suivante:
+        <hr>
+        We bevestigen de goede ontvangst van het ingediende document, dat binnenkort zal worden verwerkt.
+        In afwachting daarvan kunt deze ondertussen tijdelijk op het volgende adres: 
+      </p>
+      <p>
+      <a href="{{ doc_domain }}/hash/{{ doc_hash }}">{{ doc_domain }}/hash/{{ doc_hash }}</a>
+      </p>
+    </div>     
+    <div id="f72h_content">
+      <a href="https://openjustice.be">
+        asbl - vzw OpenJustice.be
+      </a>
+    </div>
+</body>
+</html>

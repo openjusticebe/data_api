@@ -7,7 +7,11 @@ This project adheres to [Semantic Versioning](http://semver.org/)
 and to the [CHANGELOG recommendations](http://keepachangelog.com/).
 ## Alpha Development
 
-### [4] - (2020-01-21)
+### [5] - (2020-02-21)
+- added author information in edit screen
+- added send mail capability
+
+### [4] - (2020-02-15)
 - refactoring code, using routes to separate functionnality
 - adding OAuth support for authenticating users
 - added interfaces for reviewing and updating content
