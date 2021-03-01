@@ -227,9 +227,8 @@
                 }
             }
 
-            #appel {
+            .appel {
                 display:inline-block;
-                color:red;
                 font-family: 'Special Elite', 'VT323', 'Volkhov', monospace;
                 font-size:1.2em;
                 border:2px red solid;
@@ -241,9 +240,19 @@
                 text-align:center;
             }
 
-            #appel hr {
+            .appel hr {
               color:red;
               border-color:red;
+            }
+
+            #nodata{
+              color:#777;
+              border-color:#777;
+            }
+
+            #nodata hr {
+              color:#777;
+              border-color:#777;
             }
         </style>
     </head>
@@ -277,10 +286,16 @@
             {% endfor %}
             </ul>
             {% if appeal == 'yes' %}
-            <div id="appel">
+            <div id="appel" class="appel">
               Appel interjeté
               <hr/>
               Beroep ingedient
+            </div>
+            {% elif appeal == 'nodata' %}
+            <div id="nodata" class="appel">
+              Appel eventuel
+              <hr/>
+              Mogelijk beroep
             </div>
             {% endif %}
             {{ text|safe }}
@@ -324,6 +339,12 @@
             colorLight:'#f9f7f7',
           }
         );
+
+        // Remove url token in case admin wishes to share url
+        // const params = new URLSearchParams(location.search);
+        // params.delete('t');
+        // window.history.replaceState({}, '', `${location.pathname}?${params}`);
+         window.history.replaceState({}, '', `${location.pathname}`);
       </script>
       <!-- Matomo -->
       <script type="text/javascript">

@@ -4,8 +4,6 @@ import logging
 import operator
 import yaml
 
-logger = logging.getLogger(__name__)
-
 
 def get_by_path(root, items):
     """Access a nested object in root by item sequence."""
@@ -43,15 +41,24 @@ class ConfigClass:
             'algorithm': 'HS256',
             'expiration_minutes': 30,
         },
+        'smtp': {
+            'host': os.getenv('SMTP_HOST', 'localhost'),
+            'user': os.getenv('SMTP_USER', 'user'),
+            'port': os.getenv('SMTP_PORT', 'port'),
+            'password': os.getenv('SMTP_PASSWORD', 'password'),
+        },
         'log_level': 'info',
         'salt': os.getenv('SALT', 'OpenJusticePirates'),
         'token': os.getenv('token', 'SomeToken'),
+        'oj_doc_domain': os.getenv('DOC_URI', 'http://localhost:5005'),
+        'oj_env': os.getenv('OJ_ENV', 'development'),
+        'hash_max_views': os.getenv('HASH_VIEWS', 1000),
     }
 
     def merge(self, cfg):
         self._config = {**self._config, **cfg}
 
-    def dump(self):
+    def dump(self, logger):
         logger.debug('config: %s', yaml.dump(self._config, indent=2))
 
     def key(self, k):

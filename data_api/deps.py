@@ -1,7 +1,9 @@
 import random
 import logging
+import os
 from datetime import datetime
 from fastapi.templating import Jinja2Templates
+from jinja2 import Environment, FileSystemLoader
 from fastapi import Header, HTTPException
 from .lib_cfg import config
 
@@ -10,6 +12,8 @@ logger.setLevel(logging.getLevelName('INFO'))
 logger.addHandler(logging.StreamHandler())
 
 templates = Jinja2Templates(directory="templates")
+jinjaEnv = Environment(
+    loader=FileSystemLoader('%s/../templates/' % os.path.dirname(__file__)))
 
 DB_POOL = False
 
@@ -35,5 +39,5 @@ async def get_db():
 
 def doc_hash(ecli):
     nonce = random.randint(0, 99999999)
-    num = hex(abs(hash(F"{ecli}{nonce}{config['salt']}{datetime.now()}")))
+    num = hex(abs(hash(F"{ecli}{nonce}{config.key('salt')}{datetime.now()}")))
     return num.lstrip("0x").rstrip("L")

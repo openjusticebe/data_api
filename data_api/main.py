@@ -41,7 +41,7 @@ from data_api.models import (
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
-VERSION = 4
+VERSION = 5
 START_TIME = datetime.now(pytz.utc)
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -178,7 +178,7 @@ def main():
         config.set('log_level', 'debug')
         config.set(['server', 'log_level'], 'debug')
         logger.debug('Arguments: %s', args)
-        config.dump()
+        config.dump(logger)
         # logger.debug('config: %s', toml.dumps(config))
 
         # uvicorn.run(
