@@ -11,11 +11,8 @@ ENV ENV=${ENV} \
   PIP_DEFAULT_TIMEOUT=100 \
   POETRY_VERSION=1.1.4
 
-RUN apt-get update && apt-get upgrade -y
-RUN apt-get install -y \
-    pandoc \
-    texlive \
-    texlive-latex-extra 
+COPY install-packages.sh .
+RUN ./install-packages.sh
 
 RUN pip install "poetry==$POETRY_VERSION"
 
