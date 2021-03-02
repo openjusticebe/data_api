@@ -12,6 +12,11 @@ ENV ENV=${ENV} \
   POETRY_VERSION=1.1.4
 
 RUN apt-get update && apt-get upgrade -y
+RUN apt-get install -y \
+    pandoc \
+    texlive \
+    texlive-latex-extra 
+
 RUN pip install "poetry==$POETRY_VERSION"
 
 WORKDIR /app
