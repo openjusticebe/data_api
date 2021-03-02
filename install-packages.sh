@@ -19,7 +19,7 @@ apt-get -y upgrade
 # Install a new package, without unnecessary recommended packages:
 apt-get -y install --no-install-recommends \
     pandoc \
-    textlive \
+    texlive \
     texlive-latex-extra 
 
 # Delete cached files we don't need anymore:
