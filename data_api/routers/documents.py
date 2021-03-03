@@ -2,7 +2,6 @@ import json
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from starlette.requests import Request
-from markdown2 import Markdown
 from datetime import datetime
 from data_api.lib_cfg import config
 from ..models import (
@@ -24,7 +23,7 @@ from ..deps import (
 )
 from ..lib_mail import notify
 from data_api.lib_parse import (
-    convert
+    txt2html
 )
 
 router = APIRouter()
@@ -110,7 +109,7 @@ async def create(query: SubmitModel, request: Request, db=Depends(get_db)):
             doc.label,
         )
 
-    notify(rec, 'create_doc', {'doc_hash': docHash})
+    await notify(rec, 'create_doc', {'doc_hash': docHash})
     logger.debug('Wrote ecli %s ( hash %s ) to database', ecli, docHash)
     return {'result': "ok", 'hash': docHash}
 
@@ -285,7 +284,7 @@ async def update(
             "SELECT ukey FROM ecli_document WHERE id_internal = $1",
             document_id)
         user = get_user_by_key(ukey)
-        notify(user, 'publish_doc', {'ecli': ecli})
+        await notify(user, 'publish_doc', {'ecli': ecli})
 
     # logger.debug('Wrote ecli %s ( hash %s ) to database', ecli, docHash)
     return {'result': "ok"}
@@ -343,11 +342,7 @@ async def view_html_hash(
     else:
         logger.info("Admin View enabled for %s", dochash)
 
-    markdowner = Markdown()
-    html_text = markdowner.convert(
-        res['text'].replace('_', '\\_')
-    )
-    html_text = convert(html_text)
+    html_text = txt2html(res['text'])
 
     sql_links = """
     SELECT target_type, target_identifier, target_label
@@ -372,6 +367,7 @@ async def view_html_hash(
         'appeal': res['appeal'],
         'elis': eli_links,
         'eclis': ecli_links,
+        'hash': dochash,
     })
 
 
@@ -379,7 +375,7 @@ async def view_html_hash(
 async def view_html_ecli(request: Request, ecli, db=Depends(get_db)):
     # FIXME: add text output on request ACCEPT
     sql = """
-    SELECT id_internal, ecli, text, appeal, meta->'labels' AS labels
+    SELECT id_internal, ecli, text, appeal, meta->'labels' AS labels, hash
     FROM ecli_document
     WHERE ecli = $1
     AND status = 'public'
@@ -390,11 +386,7 @@ async def view_html_ecli(request: Request, ecli, db=Depends(get_db)):
     if not res:
         raise HTTPException(status_code=404, detail="Document not found")
 
-    markdowner = Markdown()
-    html_text = markdowner.convert(
-        res['text'].replace('_', '\\_')
-    )
-    html_text = convert(html_text)
+    html_text = txt2html(res['text'])
 
     sql_links = """
     SELECT target_type, target_identifier, target_label
@@ -421,6 +413,7 @@ async def view_html_ecli(request: Request, ecli, db=Depends(get_db)):
         'appeal': res['appeal'],
         'elis': eli_links,
         'eclis': ecli_links,
+        'hash': res['hash'],
     })
 
 

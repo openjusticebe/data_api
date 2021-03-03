@@ -19,6 +19,7 @@ from .routers import (
     collections,
     documents,
     users,
+    formats,
 )
 
 from .deps import (
@@ -78,6 +79,7 @@ app.mount("/static", StaticFiles(directory="./static"), name="static")
 app.include_router(users.router)
 app.include_router(collections.router)
 app.include_router(documents.router)
+app.include_router(formats.router)
 
 # Server config
 app.add_middleware(

@@ -176,16 +176,22 @@
               opacity:.5;
             }
 
-            .page_menu {
+            #pmenu {
                 position:absolute;
                 top:5px;
                 left:7px;
             }
 
+            #fmenu {
+                position:absolute;
+                top:5px;
+                right:7px;
+            }
+
             .page_menu a {
                 display:inline;
                 text-decoration:none;
-                color:#999;
+                color:#666;
                 text-transform:lowercase;
                 font-size:.8em;
                 border-right: 1px solid #999;
@@ -228,10 +234,11 @@
             }
 
             .appel {
+                color:#933;
                 display:inline-block;
                 font-family: 'Special Elite', 'VT323', 'Volkhov', monospace;
                 font-size:1.2em;
-                border:2px red solid;
+                border:2px #933 solid;
                 border-radius:6px;
                 padding:4px 3px 0;
                 margin-top: -4rem;
@@ -241,8 +248,8 @@
             }
 
             .appel hr {
-              color:red;
-              border-color:red;
+              color:#933;
+              border-color:#933;
             }
 
             #nodata{
@@ -274,9 +281,13 @@
             </ul>
         </header>
         <div class="text">
-          <div class="page_menu">
+          <div id="pmenu" class="page_menu">
             <a href="#text">Document</a>
             <a href="#links">Mentions</a>
+          </div>
+          <div id="fmenu" class="page_menu">
+            <a href="/d/pdf/{{ hash }}" target="_blank">PDF</a>
+            <a href="/d/txt/{{ hash }}" target="_blank">TXT</a>
           </div>
           <a name="text"></a><h1 class="title">{{ ecli }}</h1>
             <div id="qrcode"> </div>

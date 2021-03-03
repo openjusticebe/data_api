@@ -6,6 +6,12 @@ This changelog references the relevant changes done in this project.
 This project adheres to [Semantic Versioning](http://semver.org/) 
 and to the [CHANGELOG recommendations](http://keepachangelog.com/).
 ## Alpha Development
+### [6] - (2020-03-02)
+- added latex and pdf conversion
+- added links to pdf and text versions
+- added basic latex document template
+- added pdf link to notification email
+- added pdf as attachment to notification mail
 
 ### [5] - (2020-02-27)
 - added author information in edit screen
