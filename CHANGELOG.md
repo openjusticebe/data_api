@@ -11,6 +11,7 @@ and to the [CHANGELOG recommendations](http://keepachangelog.com/).
 - added links to pdf and text versions
 - added basic latex document template
 - added pdf link to notification email
+- added pdf as attachment to notification mail
 
 ### [5] - (2020-02-27)
 - added author information in edit screen

@@ -109,7 +109,7 @@ async def create(query: SubmitModel, request: Request, db=Depends(get_db)):
             doc.label,
         )
 
-    notify(rec, 'create_doc', {'doc_hash': docHash})
+    await notify(rec, 'create_doc', {'doc_hash': docHash})
     logger.debug('Wrote ecli %s ( hash %s ) to database', ecli, docHash)
     return {'result': "ok", 'hash': docHash}
 
@@ -284,7 +284,7 @@ async def update(
             "SELECT ukey FROM ecli_document WHERE id_internal = $1",
             document_id)
         user = get_user_by_key(ukey)
-        notify(user, 'publish_doc', {'ecli': ecli})
+        await notify(user, 'publish_doc', {'ecli': ecli})
 
     # logger.debug('Wrote ecli %s ( hash %s ) to database', ecli, docHash)
     return {'result': "ok"}

@@ -6,6 +6,7 @@ from fastapi.templating import Jinja2Templates
 from jinja2 import Environment, FileSystemLoader
 from fastapi import Header, HTTPException
 from .lib_cfg import config
+from contextlib import asynccontextmanager
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.getLevelName('INFO'))
@@ -29,6 +30,16 @@ async def get_query_token(token: str):
 
 
 async def get_db():
+    global DB_POOL  # pylint:disable=global-statement
+    conn = await DB_POOL.acquire()
+    try:
+        yield conn
+    finally:
+        await DB_POOL.release(conn)
+
+
+@asynccontextmanager
+async def oj_db():
     global DB_POOL  # pylint:disable=global-statement
     conn = await DB_POOL.acquire()
     try:
