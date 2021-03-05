@@ -17,8 +17,6 @@ Jinja2 = "^2.11.2"
 markdown2 = "^2.3.10"
 aiofiles = "^0.6.0"
 python-multipart = "^0.0.5"
-python-jose = "^3.2.0"
-passlib = {extras = ["argon2"], version = "^1.7.4"}
 requests = "^2.25.1"
 cryptography = "^3.4.6"
 

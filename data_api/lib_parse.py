@@ -1,14 +1,13 @@
+import os
 import re
 import shutil
-from markdown2 import Markdown
 import subprocess
-from subprocess import Popen, PIPE, STDOUT
-import re
-import os
 import tempfile
-from .deps import (
-    logger,
-)
+from subprocess import PIPE, STDOUT, Popen
+
+from markdown2 import Markdown
+
+from .deps import logger
 
 # FIXME: Remove global variable
 ITER = 0

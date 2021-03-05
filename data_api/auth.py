@@ -1,15 +1,16 @@
 import asyncio
+from typing import Optional
+
 import requests
-from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from typing import Optional
-from .lib_cfg import config
+
 from data_api.models import User
+
 from .deps import logger, oj_code
+from .lib_cfg import config
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl=(config.key('token')), auto_error=False)
-pwd_context = CryptContext(schemes=['argon2'], deprecated='auto')
 
 credentials_exception = HTTPException(
     status_code=(status.HTTP_401_UNAUTHORIZED),
