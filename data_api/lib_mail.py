@@ -1,19 +1,13 @@
-from smtplib import SMTP
-from .lib_cfg import (config)
-from .deps import (
-    logger,
-    jinjaEnv,
-    oj_db,
-)
-from .lib_parse import (
-    md2latex,
-    latex2pdf,
-)
-from datetime import datetime
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from email.mime.application import MIMEApplication
 from collections import namedtuple
+from datetime import datetime
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from smtplib import SMTP
+
+from .deps import jinjaEnv, logger, oj_db
+from .lib_cfg import config
+from .lib_parse import latex2pdf, md2latex
 
 Tpl = namedtuple('Tpl', ['file', 'subject', 'variables', 'attach_pdf'])
 OJ_ENV = config.key('oj_env')

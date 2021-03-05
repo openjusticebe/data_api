@@ -2,47 +2,33 @@
 import argparse
 import logging
 import os
-import toml
 from datetime import datetime
 
 import asyncpg
 import pytz
+import toml
 import uvicorn
 from fastapi import Depends, FastAPI, HTTPException
-from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from pydantic import Json
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
-from pydantic import Json
 
-from .routers import (
-    collections,
-    documents,
-    users,
-    formats,
-)
-
-from .deps import (
-    get_db,
-    templates,
-    logger,
-)
-from .lib_cfg import (config)
 import data_api.deps as deps
-
 import data_api.lib_misc as lm
-from data_api.models import (
-    # ListModel,
-    ListTypes,
-)
+from data_api.models import ListTypes  # ListModel,
 
+from .deps import get_db, logger, templates
+from .lib_cfg import config
+from .routers import collections, documents, formats, users
 
 # ################################################### SETUP AND ARGUMENT PARSING
 # ##############################################################################
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
-VERSION = 5
+VERSION = 6
 START_TIME = datetime.now(pytz.utc)
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -181,13 +167,13 @@ def main():
         config.set(['server', 'log_level'], 'debug')
         logger.debug('Arguments: %s', args)
         config.dump(logger)
-        # logger.debug('config: %s', toml.dumps(config))
+        logger.debug('config: %s', toml.dumps(config._config))
 
-        # uvicorn.run(
-        #     "data_api.main:app",
-        #     reload=True,
-        #     **config.key('server')
-        # )
+        uvicorn.run(
+            "data_api.main:app",
+            reload=True,
+            **config.key('server')
+        )
     uvicorn.run(
         app,
         **config.key('server')

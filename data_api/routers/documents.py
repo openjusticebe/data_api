@@ -11,7 +11,7 @@ from ..models import (
 )
 from ..auth import (
     get_current_active_user_opt,
-    decode_token,
+    token_get_user,
     credentials_exception,
     get_user_by_key,
 )
@@ -38,7 +38,7 @@ async def create(query: SubmitModel, request: Request, db=Depends(get_db)):
     """
     logger.info('Testing user key %s', query.user_key)
     # FIXME : Fix airtable key checking
-    rec = get_user_by_key(query.user_key)
+    rec = await get_user_by_key(query.user_key)
 
     if not rec:
         raise HTTPException(status_code=401, detail="bad user key")
@@ -154,7 +154,7 @@ async def read(
     """
 
     doc_raw = await db.fetchrow(sql, document_id)
-    user = get_user_by_key(doc_raw['ukey'])
+    user = await get_user_by_key(doc_raw['ukey'])
     if not user:
         raise RuntimeError('Could not find user with key %s', doc_raw['ukey'])
 
@@ -283,7 +283,7 @@ async def update(
         ukey = await db.fetchval(
             "SELECT ukey FROM ecli_document WHERE id_internal = $1",
             document_id)
-        user = get_user_by_key(ukey)
+        user = await get_user_by_key(ukey)
         await notify(user, 'publish_doc', {'ecli': ecli})
 
     # logger.debug('Wrote ecli %s ( hash %s ) to database', ecli, docHash)
@@ -311,7 +311,7 @@ async def view_html_hash(
 
     if t != '':
         try:
-            user = decode_token(t)
+            user = token_get_user(t)
             is_admin = user.admin
         except Exception as e:
             logger.warning("User hash Token error")

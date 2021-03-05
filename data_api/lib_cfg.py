@@ -1,7 +1,8 @@
-from functools import reduce
-import os
 import logging
 import operator
+import os
+from functools import reduce
+
 import yaml
 
 
@@ -32,15 +33,6 @@ class ConfigClass:
             'log_level': os.getenv('LOG_LEVEL', 'info'),
             'timeout_keep_alive': 0,
         },
-        'airtable': {
-            'base_id': os.getenv('AIRTABLE_BASE', ''),
-            'api_key': os.getenv('AIRTABLE_API', ''),
-        },
-        'auth': {
-            'secret_key': os.getenv('AUTH_KEY', 'be62bbb060280c3955092298ab8ebbb3af0e104cd90cb969bb400e2204280ae4'),
-            'algorithm': 'HS256',
-            'expiration_minutes': 30,
-        },
         'smtp': {
             'host': os.getenv('SMTP_HOST', 'localhost'),
             'user': os.getenv('SMTP_USER', 'user'),
@@ -48,11 +40,11 @@ class ConfigClass:
             'password': os.getenv('SMTP_PASSWORD', 'password'),
         },
         'log_level': 'info',
-        'salt': os.getenv('SALT', 'OpenJusticePirates'),
-        'token': os.getenv('token', 'SomeToken'),
-        'oj_doc_domain': os.getenv('DOC_URI', 'http://localhost:5005'),
+        'oj_doc_domain': os.getenv('DOC_URI', 'http://localhost:5010'),
         'oj_env': os.getenv('OJ_ENV', 'development'),
+        'oj_key': os.getenv('OJ_KEY', '5aLqJFte6G7IsuDNTOhjO8ICcKme62sRs0tX2XHQyzs='),
         'hash_max_views': os.getenv('HASH_VIEWS', 1000),
+        'auth_host': os.getenv('AUTH_HOST', 'http://localhost:5015')
     }
 
     def merge(self, cfg):

@@ -14,7 +14,7 @@ from data_api.lib_parse import (
     latex2pdf,
 )
 from ..auth import (
-    decode_token,
+    token_get_user,
 )
 
 router = APIRouter()
@@ -25,7 +25,7 @@ async def check_access(t, status, db, dochash, views_hash):
 
     if t != '':
         try:
-            user = decode_token(t)
+            user = token_get_user(t)
             is_admin = user.admin
         except Exception as e:
             logger.warning("User hash Token error")
