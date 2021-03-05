@@ -181,13 +181,13 @@ def main():
         config.set(['server', 'log_level'], 'debug')
         logger.debug('Arguments: %s', args)
         config.dump(logger)
-        # logger.debug('config: %s', toml.dumps(config))
+        logger.debug('config: %s', toml.dumps(config._config))
 
-        # uvicorn.run(
-        #     "data_api.main:app",
-        #     reload=True,
-        #     **config.key('server')
-        # )
+        uvicorn.run(
+            "data_api.main:app",
+            reload=True,
+            **config.key('server')
+        )
     uvicorn.run(
         app,
         **config.key('server')
