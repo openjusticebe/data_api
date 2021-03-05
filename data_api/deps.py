@@ -7,6 +7,7 @@ from jinja2 import Environment, FileSystemLoader
 from fastapi import Header, HTTPException
 from .lib_cfg import config
 from contextlib import asynccontextmanager
+from cryptography.fernet import Fernet
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.getLevelName('INFO'))
@@ -17,6 +18,11 @@ jinjaEnv = Environment(
     loader=FileSystemLoader('%s/../templates/' % os.path.dirname(__file__)))
 
 DB_POOL = False
+
+
+def oj_code(payload: str):
+    f = Fernet(config.key('oj_key'))
+    return f.encrypt(payload.encode()).decode()
 
 
 async def get_token_header(x_token: str = Header(...)):
