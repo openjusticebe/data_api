@@ -6,6 +6,10 @@ This changelog references the relevant changes done in this project.
 This project adheres to [Semantic Versioning](http://semver.org/) 
 and to the [CHANGELOG recommendations](http://keepachangelog.com/).
 ## Alpha Development
+### [7] - (2020-03-05)
+- refactored auth part
+- removed unneeded dependencies
+
 ### [6] - (2020-03-02)
 - added latex and pdf conversion
 - added links to pdf and text versions
