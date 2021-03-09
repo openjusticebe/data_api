@@ -157,7 +157,7 @@ async def view_pdf_hash(
     return res['text']
 
 
-@router.get("/d/latex/{dochash}", response_class=PlainTextResponse, tags=["access"])
+@router.get("/d/tex/{dochash}", response_class=PlainTextResponse, tags=["access"])
 async def view_pdf_hash(
         request: Request,
         dochash: str,
@@ -182,7 +182,7 @@ async def view_pdf_hash(
     })
 
 
-@router.get("/latex/{ecli}", response_class=PlainTextResponse, tags=["access"])
+@router.get("/tex/{ecli}", response_class=PlainTextResponse, tags=["access"])
 async def view_pdf_hash(
         request: Request,
         ecli: str,
