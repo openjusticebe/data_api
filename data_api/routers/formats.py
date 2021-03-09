@@ -53,6 +53,9 @@ async def view_pdf_hash(
         dochash: str,
         db=Depends(get_db),
         t: str = ''):
+    """
+    Temporary hash-based access to pdf version of a document
+    """
 
     sql = """
     SELECT id_internal, identifier, ecli, text, appeal, meta->'labels' AS labels, views_hash, status
@@ -65,6 +68,39 @@ async def view_pdf_hash(
         raise HTTPException(status_code=404, detail="Document not found")
     else:
         await check_access(t, res['status'], db, dochash, res['views_hash'])
+
+    latex = md2latex({
+        'body': res['text'],
+        'title': res['ecli'],
+    })
+    fname = re.sub(r'[\W_]+', '-', res['identifier'])
+    return Response(
+        content=latex2pdf(latex),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"inline; filename=\"{fname}.pdf\""}
+    )
+
+
+@router.get("/pdf/{ecli}", tags=["access"])
+async def view_pdf_hash(
+        request: Request,
+        ecli: str,
+        db=Depends(get_db),
+        t: str = ''):
+    """
+    Access to the pdf version of a document
+    """
+
+    sql = """
+    SELECT id_internal, identifier, ecli, text, appeal, meta->'labels' AS labels, views_hash, status
+    FROM ecli_document
+    WHERE ecli = $1
+    AND status = 'public'
+    """
+
+    res = await db.fetchrow(sql, ecli)
+    if not res:
+        raise HTTPException(status_code=404, detail="Document not found")
 
     latex = md2latex({
         'body': res['text'],
@@ -100,6 +136,27 @@ async def view_pdf_hash(
     return res['text']
 
 
+@router.get("/txt/{ecli}", response_class=PlainTextResponse, tags=["access"])
+async def view_pdf_hash(
+        request: Request,
+        ecli: str,
+        db=Depends(get_db),
+        t: str = ''):
+
+    sql = """
+    SELECT id_internal, ecli, text, appeal, meta->'labels' AS labels, views_hash, status
+    FROM ecli_document
+    WHERE ecli = $1
+    AND status = 'public'
+    """
+
+    res = await db.fetchrow(sql, ecli)
+    if not res:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    return res['text']
+
+
 @router.get("/d/latex/{dochash}", response_class=PlainTextResponse, tags=["access"])
 async def view_pdf_hash(
         request: Request,
@@ -118,6 +175,30 @@ async def view_pdf_hash(
         raise HTTPException(status_code=404, detail="Document not found")
     else:
         await check_access(t, res['status'], db, dochash, res['views_hash'])
+
+    return md2latex({
+        'body': res['text'],
+        'title': res['ecli'],
+    })
+
+
+@router.get("/latex/{ecli}", response_class=PlainTextResponse, tags=["access"])
+async def view_pdf_hash(
+        request: Request,
+        ecli: str,
+        db=Depends(get_db),
+        t: str = ''):
+
+    sql = """
+    SELECT id_internal, ecli, text, appeal, meta->'labels' AS labels, views_hash, status
+    FROM ecli_document
+    WHERE ecli = $1
+    AND status = 'public'
+    """
+
+    res = await db.fetchrow(sql, ecli)
+    if not res:
+        raise HTTPException(status_code=404, detail="Document not found")
 
     return md2latex({
         'body': res['text'],
