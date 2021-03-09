@@ -286,8 +286,13 @@
             <a href="#links">Mentions</a>
           </div>
           <div id="fmenu" class="page_menu">
-            <a href="/d/pdf/{{ hash }}" target="_blank">PDF</a>
-            <a href="/d/txt/{{ hash }}" target="_blank">TXT</a>
+            {% if ishash %}
+              <a href="/d/pdf/{{ hash }}" target="_blank">PDF</a>
+              <a href="/d/txt/{{ hash }}" target="_blank">TXT</a>
+            {% else %}
+              <a href="/pdf/{{ ecli }}" target="_blank">PDF</a>
+              <a href="/txt/{{ ecli }}" target="_blank">TXT</a>
+            {% endif %}
           </div>
           <a name="text"></a><h1 class="title">{{ ecli }}</h1>
             <div id="qrcode"> </div>
