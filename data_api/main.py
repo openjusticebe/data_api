@@ -28,7 +28,7 @@ from .routers import collections, documents, formats, users
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
-VERSION = 6
+VERSION = 7
 START_TIME = datetime.now(pytz.utc)
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
