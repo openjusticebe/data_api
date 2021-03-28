@@ -32,13 +32,22 @@ router = APIRouter()
 # ############### CRUD
 # ####################
 @router.post("/create", tags=["crud"])
-async def create(query: SubmitModel, request: Request, db=Depends(get_db)):
+async def create(
+        query: SubmitModel,
+        request: Request,
+        current_user: User = Depends(get_current_active_user_opt),
+        db=Depends(get_db)):
+
     """
     Submit document endpoint
     """
-    logger.info('Testing user key %s', query.user_key)
-    # FIXME : Fix airtable key checking
-    rec = await get_user_by_key(query.user_key)
+
+    if current_user:
+        logger.info('User authentified %s', current_user.username)
+        rec = current_user
+    else:
+        logger.info('Testing user key %s', query.user_key)
+        rec = await get_user_by_key(query.user_key)
 
     if not rec:
         raise HTTPException(status_code=401, detail="bad user key")
@@ -368,6 +377,7 @@ async def view_html_hash(
         'elis': eli_links,
         'eclis': ecli_links,
         'hash': dochash,
+        'ishash': True,
     })
 
 
@@ -414,6 +424,7 @@ async def view_html_ecli(request: Request, ecli, db=Depends(get_db)):
         'elis': eli_links,
         'eclis': ecli_links,
         'hash': res['hash'],
+        'ishash': False,
     })
 
 
