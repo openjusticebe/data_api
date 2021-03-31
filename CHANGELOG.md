@@ -6,6 +6,9 @@ This changelog references the relevant changes done in this project.
 This project adheres to [Semantic Versioning](http://semver.org/) 
 and to the [CHANGELOG recommendations](http://keepachangelog.com/).
 ## Alpha Development
+### [8] - (2020-03-31)
+- mail server timeout hotfix
+
 ### [7] - (2020-03-09)
 - refactored auth part
 - removed unneeded dependencies

@@ -101,9 +101,12 @@ def send_mail(mTo, mSubject, mBody, mAttach):
 
     msgBody = message.as_string()
 
-    server = SMTP(config.key(['smtp', 'host']), config.key(['smtp', 'port']))
-    server.starttls()
-    server.login(mFrom, config.key(['smtp', 'password']))
-    server.sendmail(mFrom, mTo, msgBody)
-
-    server.quit()
+    try:
+        server = SMTP(host=config.key(['smtp', 'host']), port=config.key(['smtp', 'port']), timeout=5)
+        server.starttls()
+        server.login(mFrom, config.key(['smtp', 'password']))
+        server.sendmail(mFrom, mTo, msgBody)
+        server.quit()
+    except Exception as e:
+        logger.critical("Failed to send a message")
+        logger.exception(e)
