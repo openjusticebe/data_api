@@ -214,8 +214,11 @@ async def update(
     """
     Update document endpoint
     """
-    logger.info("Update query received for document %s" % document_id)
 
+    if not current_user.admin:
+        raise credentials_exception
+
+    logger.info("Update query received for document %s" % document_id)
     ecli = f"ECLI:{query.country}:{query.court}:{query.year}:{query.identifier}"
 
     meta = query.meta if query.meta is not None else {}

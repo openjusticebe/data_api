@@ -96,7 +96,7 @@ async def read_collection(
     /c/review -> latests documents awaiting review
     ...
     """
-    logger.debug('User %s queried collection %s', current_user, collection)
+    logger.info('User %s queried collection %s', current_user, collection)
     try:
         call = getattr(Collections, collection)
     except Exception as e:
