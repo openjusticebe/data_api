@@ -44,6 +44,31 @@ async def get_user_by_key(user_key: str):
     return User(**user)
 
 
+async def get_user_by_email(user_email: str):
+    logger.debug('Getting user from API, by email')
+    url = '{host}/u/by/email'.format(host=(config.key('auth_host')))
+    t = 0
+    while True:
+        r = requests.post(url, json={
+            'email': oj_code(user_email),
+            'env': config.key('oj_env')
+        })
+        if r.status_code == 200:
+            break
+        if r.status_code == 401:
+            raise credentials_exception
+        else:
+            await asyncio.sleep(1)
+            t += 1
+        if t > 4:
+            raise credentials_exception
+
+    user = r.json()
+    if user.get('valid') is not True:
+        raise credentials_exception
+    return User(**user)
+
+
 async def get_current_user(token: Optional[str] = Depends(oauth2_scheme)):
     if not token:
         return False

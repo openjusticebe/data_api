@@ -14,6 +14,7 @@ from ..auth import (
     token_get_user,
     credentials_exception,
     get_user_by_key,
+    get_user_by_email,
 )
 from ..deps import (
     get_db,
@@ -44,16 +45,16 @@ async def create(
 
     if current_user:
         logger.info('User authentified %s', current_user.username)
-        rec = current_user
+        userRecord = current_user
     else:
         logger.info('Testing user key %s', query.user_key)
-        rec = await get_user_by_key(query.user_key)
+        userRecord = await get_user_by_key(query.user_key)
 
-    if not rec:
+    if not userRecord:
         raise HTTPException(status_code=401, detail="bad user key")
 
     ecli = f"ECLI:{query.country}:{query.court}:{query.year}:{query.identifier}"
-    logger.info("User %s / %s submitting text %s", rec.username, rec.email, ecli)
+    logger.info("User %s / %s submitting text %s", userRecord.username, userRecord.email, ecli)
 
     meta = query.meta if query.meta is not None else {}
     meta['labels'] = query.labels
@@ -86,7 +87,7 @@ async def create(
         query.identifier,
         query.text,
         json.dumps(meta),
-        query.user_key,
+        userRecord.email,
         query.lang,
         query.appeal,
         docHash,
@@ -118,7 +119,7 @@ async def create(
             doc.label,
         )
 
-    await notify(rec, 'create_doc', {'doc_hash': docHash})
+    await notify(userRecord, 'create_doc', {'doc_hash': docHash})
     logger.debug('Wrote ecli %s ( hash %s ) to database', ecli, docHash)
     return {'result': "ok", 'hash': docHash}
 
@@ -163,9 +164,20 @@ async def read(
     """
 
     doc_raw = await db.fetchrow(sql, document_id)
-    user = await get_user_by_key(doc_raw['ukey'])
+
+    if '@' in doc_raw['ukey']:
+        user = await get_user_by_email(doc_raw['ukey'])
+    else:
+        user = await get_user_by_key(doc_raw['ukey'])
+
     if not user:
-        raise RuntimeError('Could not find user with key %s', doc_raw['ukey'])
+        logger.error('Document %s error : empty user detected', doc_raw['id'])
+        user = User(
+            email='unknown@example.com',
+            valid=False,
+            username='unknown',
+            admin=False
+        )
 
     doc_data = {
         'id': doc_raw['id'],
