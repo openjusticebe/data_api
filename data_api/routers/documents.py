@@ -86,7 +86,7 @@ async def create(
         query.identifier,
         query.text,
         json.dumps(meta),
-        query.user_key,
+        rec.ukey,
         query.lang,
         query.appeal,
         docHash,
