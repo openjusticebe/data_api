@@ -6,6 +6,12 @@ This changelog references the relevant changes done in this project.
 This project adheres to [Semantic Versioning](http://semver.org/) 
 and to the [CHANGELOG recommendations](http://keepachangelog.com/).
 ## Alpha Development
+### [10] - (XXX)
+[todo]
+- attribute ark to new documents
+- store arks in database
+- link documents to terms through voc\_api support
+
 ### [9] - (2021-12-07)
 - fixing user upload bug when using account instead of key
 - adding query user by email method

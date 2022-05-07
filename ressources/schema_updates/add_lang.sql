@@ -1,1 +1,2 @@
-ALTER TABLE ecli_document ADD COLUMN lang VARCHAR(2);
+ALTER TABLE ecli_document ADD COLUMN ark TEXT;
+CREATE INDEX ecli_document_ark ON "ecli_document" (ark);
