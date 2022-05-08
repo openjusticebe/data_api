@@ -11,6 +11,7 @@ and to the [CHANGELOG recommendations](http://keepachangelog.com/).
 - attribute ark to new documents
 - store arks in database
 - link documents to terms through voc\_api support
+- expose ark ID's through API
 
 ### [9] - (2021-12-07)
 - fixing user upload bug when using account instead of key
