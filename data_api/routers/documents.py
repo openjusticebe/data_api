@@ -34,6 +34,8 @@ router = APIRouter()
 # ### BACKGROUND TASKS
 # ####################
 def getArkAndStoreVoc(id_internal: int, terms: list):
+    # If job is too cumbersone, see
+    # https://fastapi.tiangolo.com/tutorial/background-tasks/#caveat
     with get_db() as db:
         docHash = await db.fetchval(
             "SELECT hash FROM ecli_document WHERE id_internal = $1",
@@ -60,6 +62,7 @@ def getArkAndStoreVoc(id_internal: int, terms: list):
 async def create(
         query: SubmitModel,
         request: Request,
+        background_tasks: BackgroundTasks,
         current_user: User = Depends(get_current_active_user_opt),
         db=Depends(get_db)):
 
@@ -143,8 +146,8 @@ async def create(
             doc.label,
         )
 
-    # TODO:
     # Run ark ID & link definition through a background task
+    background_tasks.add_task(getArkAndStoreVoc, docId, query.terms)
 
     await notify(userRecord, 'create_doc', {'doc_hash': docHash})
     logger.debug('Wrote ecli %s ( hash %s ) to database', ecli, docHash)

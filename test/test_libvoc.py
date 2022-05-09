@@ -41,4 +41,4 @@ class TestLibVocFunctions(IsolatedAsyncioTestCase):
 
         getList = await OJVoc.getLinks(docId)
 
-        self.assertEqual(vocIds, getList)
+        self.assertEqual(sorted(vocIds), sorted(getList))

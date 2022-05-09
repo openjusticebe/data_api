@@ -109,7 +109,7 @@ async def setLinks(docArk: str, termArks: list):
         r = await client.post(
             f'{ config.key(["oj", "api", "voc"]) }/link',
             headers=headers,
-            data={'item_iri': docArk, 'terms': termArks}
+            content=json.dumps({'item_iri': docArk, 'terms': termArks})
         )
         r.raise_for_status()
 
