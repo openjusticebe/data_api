@@ -42,7 +42,12 @@ class ConfigClass:
         'log_level': 'info',
         'oj_doc_domain': os.getenv('DOC_URI', 'http://localhost:5010'),
         'oj_voc_uri': os.getenv('VOC_URI', 'http://localhost:5012'),
-        'oj_voc_key': os.getenv('VOC_KEY'),
+        'ark': {
+            'url': os.getenv('ARK_URL'),
+            'key': os.getenv('ARK_KEY'),
+            'naan': os.getenv('ARK_NAAN'),
+            'shoulder': os.getenv('ARK_SHOULDER'),
+        },
         'oj_env': os.getenv('OJ_ENV', 'development'),
         'oj_key': os.getenv('OJ_KEY', '5aLqJFte6G7IsuDNTOhjO8ICcKme62sRs0tX2XHQyzs='),
         'hash_max_views': os.getenv('HASH_VIEWS', 1000),
