@@ -109,7 +109,11 @@ async def setLinks(docArk: str, termArks: list):
         r = await client.post(
             f'{ config.key(["oj", "api", "voc"]) }/link',
             headers=headers,
-            content=json.dumps({'item_iri': docArk, 'terms': termArks})
+            content=json.dumps({
+                'item_iri': docArk,
+                'terms': termArks,
+                'collection': config.key(['oj', 'collection']),
+            })
         )
         r.raise_for_status()
 
@@ -120,7 +124,10 @@ async def getLinks(docArk: str):
     async with httpx.AsyncClient() as client:
         r = await client.get(
             f'{ config.key(["oj", "api", "voc"]) }/link',
-            params={'iri': docArk}
+            params={
+                'iri': docArk,
+                'collection': config.key(['oj', 'collection'])
+            }
         )
         r.raise_for_status()
         print(r)

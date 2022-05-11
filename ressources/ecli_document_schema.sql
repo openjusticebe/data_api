@@ -21,6 +21,7 @@ CREATE TABLE "ecli_document" (
     year INT,
     identifier TEXT,
     text TEXT,
+    ark TEXT,
     appeal appeal_enum DEFAULT 'nodata',
     meta JSONB,
     flags TEXT[],
@@ -46,3 +47,4 @@ CREATE INDEX ecli_links_idx ON "ecli_links" (id_internal, target_identifier);
 CREATE INDEX ecli_parts ON "ecli_document" (country, court, year, identifier);
 CREATE INDEX ecli_ecli ON "ecli_document" (ecli);
 CREATE INDEX ecli_status ON "ecli_document" (status);
+CREATE UNIQUE INDEX ecli_document_ark ON "ecli_document" (ark);

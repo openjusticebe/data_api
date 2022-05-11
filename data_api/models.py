@@ -76,6 +76,7 @@ class SubmitModel(BaseModel):
     user_key: str = Field(..., description="User key")
     doc_links: List[DocLinkType] = Field(..., description="Document links")
     labels: list
+    terms: list
     meta: Json = None
 
     class Config:
@@ -91,6 +92,7 @@ class SubmitModel(BaseModel):
                 'lang': 'NL',
                 'user_key': 'OIJAS-OIQWE',
                 'labels': [],
+                'terms': [],
                 'meta': '{}',
             }}
 

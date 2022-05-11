@@ -50,6 +50,7 @@ class ConfigClass:
         'oj': {
             'user': os.getenv('OJ_USER'),
             'pass': os.getenv('OJ_PASSWORD'),
+            'collection': os.getenv('OJ_VOC_COLLECTION', 'local_dev'),
             'api': {
                 'voc': os.getenv('VOC_URI', 'http://localhost:5012'),
                 'auth': os.getenv('AUTH_URI', 'http://localhost:5015')

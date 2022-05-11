@@ -18,6 +18,7 @@ from ..auth import (
 )
 from ..deps import (
     get_db,
+    oj_db,
     logger,
     doc_hash,
     templates,
@@ -33,18 +34,18 @@ router = APIRouter()
 
 # ### BACKGROUND TASKS
 # ####################
-def getArkAndStoreVoc(id_internal: int, terms: list):
+async def getArkAndStoreVoc(id_internal: int, terms: list):
     # If job is too cumbersone, see
     # https://fastapi.tiangolo.com/tutorial/background-tasks/#caveat
-    with get_db() as db:
+    async with oj_db() as db:
         docHash = await db.fetchval(
             "SELECT hash FROM ecli_document WHERE id_internal = $1",
             id_internal
         )
-        docUrl = f"{config.key('oj_doc_domain')}/d/pdf/${docHash}"
+        docUrl = f"{config.key('oj_doc_domain')}/d/pdf/{docHash}"
         arkId = await OJVoc.getArkId(docUrl)
         await db.execute(
-            "UPDATE ecli_document SET ark=%s where id_internal= $2",
+            "UPDATE ecli_document SET ark=$1 where id_internal= $2",
             arkId,
             id_internal
         )

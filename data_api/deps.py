@@ -48,6 +48,9 @@ async def get_db():
 
 @asynccontextmanager
 async def oj_db():
+    # TODO:
+    # Improve with this : (single context manager)
+    # https://fastapi.tiangolo.com/tutorial/dependencies/dependencies-with-yield/#context-managers
     global DB_POOL  # pylint:disable=global-statement
     conn = await DB_POOL.acquire()
     try:
