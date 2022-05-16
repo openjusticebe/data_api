@@ -59,7 +59,6 @@ class ConfigClass:
         'oj_env': os.getenv('OJ_ENV', 'development'),
         'oj_key': os.getenv('OJ_KEY', '5aLqJFte6G7IsuDNTOhjO8ICcKme62sRs0tX2XHQyzs='),
         'hash_max_views': os.getenv('HASH_VIEWS', 1000),
-        'auth_host': os.getenv('AUTH_HOST', 'http://localhost:5015')
     }
 
     def merge(self, cfg):
