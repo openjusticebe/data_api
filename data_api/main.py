@@ -102,6 +102,7 @@ def root():
 async def getList(request: Request, db=Depends(get_db), level: ListTypes = 'country', data: Json = {}):
     """
     List available data according to query
+    Note from PJ: WHY ?? Why did I do this ?? This is madness !!!
     """
     if level not in ListTypes._member_names_:
         raise HTTPException(status_code=400, detail="Bad Request")
