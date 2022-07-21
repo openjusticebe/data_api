@@ -6,8 +6,7 @@ This changelog references the relevant changes done in this project.
 This project adheres to [Semantic Versioning](http://semver.org/) 
 and to the [CHANGELOG recommendations](http://keepachangelog.com/).
 ## Alpha Development
-### [10] - (XXX)
-[todo]
+### [10] - (2022-07-21)
 - attribute ark to new documents
 - store arks in database
 - link documents to terms through voc\_api support
