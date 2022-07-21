@@ -21,7 +21,7 @@ credentials_exception = HTTPException(
 
 async def get_user_by_key(user_key: str):
     logger.debug('Getting user from API, by key')
-    url = '{host}/u/by/key'.format(host=(config.key('auth_host')))
+    url = '{host}/u/by/key'.format(host=(config.key(['oj', 'api', 'auth'])))
     t = 0
     while True:
         r = requests.post(url, json={
@@ -46,7 +46,7 @@ async def get_user_by_key(user_key: str):
 
 async def get_user_by_email(user_email: str):
     logger.debug('Getting user from API, by email')
-    url = '{host}/u/by/email'.format(host=(config.key('auth_host')))
+    url = '{host}/u/by/email'.format(host=(config.key(['oj', 'api', 'auth'])))
     t = 0
     while True:
         r = requests.post(url, json={
@@ -77,7 +77,7 @@ async def get_current_user(token: Optional[str] = Depends(oauth2_scheme)):
 
 async def token_get_user(token):
     logger.debug('Getting user data from API')
-    url = '{host}/u/by/token'.format(host=(config.key('auth_host')))
+    url = '{host}/u/by/token'.format(host=(config.key(['oj', 'api', 'auth'])))
     t = 0
     while True:
         r = requests.post(url, json={

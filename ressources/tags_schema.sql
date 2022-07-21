@@ -6,6 +6,7 @@ DROP TABLE IF EXISTS tags;
 --
 DROP INDEX IF EXISTS trgm_labels_idx;
 DROP TABLE IF EXISTS labels;
+CREATE EXTENSION pg_trgm;
 
 CREATE TABLE "labels" (
     id_internal SERIAL PRIMARY KEY,

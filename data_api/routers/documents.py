@@ -1,5 +1,5 @@
 import json
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from fastapi.responses import HTMLResponse, RedirectResponse
 from starlette.requests import Request
 from datetime import datetime
@@ -18,16 +18,43 @@ from ..auth import (
 )
 from ..deps import (
     get_db,
+    oj_db,
     logger,
     doc_hash,
     templates,
 )
 from ..lib_mail import notify
+from ..lib_cfg import config
 from data_api.lib_parse import (
     txt2html
 )
-
+import data_api.lib_voc as OJVoc
 router = APIRouter()
+
+
+# ### BACKGROUND TASKS
+# ####################
+async def getArkAndStoreVoc(id_internal: int, terms: list):
+    # If job is too cumbersone, see
+    # https://fastapi.tiangolo.com/tutorial/background-tasks/#caveat
+    async with oj_db() as db:
+        docHash = await db.fetchval(
+            "SELECT hash FROM ecli_document WHERE id_internal = $1",
+            id_internal
+        )
+        docUrl = f"{config.key('oj_doc_domain')}/d/pdf/{docHash}"
+        arkId = await OJVoc.getArkId(docUrl)
+        await db.execute(
+            "UPDATE ecli_document SET ark=$1 where id_internal= $2",
+            arkId,
+            id_internal
+        )
+    await OJVoc.setLinks(arkId, terms)
+
+    logger.info('Document %s ark set to %s, %s terms associated',
+        id_internal,
+        arkId,
+        len(terms))
 
 
 # ############### CRUD
@@ -36,6 +63,7 @@ router = APIRouter()
 async def create(
         query: SubmitModel,
         request: Request,
+        background_tasks: BackgroundTasks,
         current_user: User = Depends(get_current_active_user_opt),
         db=Depends(get_db)):
 
@@ -118,6 +146,9 @@ async def create(
             doc.link,
             doc.label,
         )
+
+    # Run ark ID & link definition through a background task
+    background_tasks.add_task(getArkAndStoreVoc, docId, query.terms)
 
     await notify(userRecord, 'create_doc', {'doc_hash': docHash})
     logger.debug('Wrote ecli %s ( hash %s ) to database', ecli, docHash)

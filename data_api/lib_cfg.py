@@ -41,10 +41,24 @@ class ConfigClass:
         },
         'log_level': 'info',
         'oj_doc_domain': os.getenv('DOC_URI', 'http://localhost:5010'),
+        'ark': {
+            'url': os.getenv('ARK_URL'),
+            'key': os.getenv('ARK_KEY'),
+            'naan': os.getenv('ARK_NAAN'),
+            'shoulder': os.getenv('ARK_SHOULDER'),
+        },
+        'oj': {
+            'user': os.getenv('OJ_USER'),
+            'pass': os.getenv('OJ_PASSWORD'),
+            'collection': os.getenv('OJ_VOC_COLLECTION', 'local_dev'),
+            'api': {
+                'voc': os.getenv('VOC_URI', 'http://localhost:5012'),
+                'auth': os.getenv('AUTH_URI', 'http://localhost:5015')
+            },
+        },
         'oj_env': os.getenv('OJ_ENV', 'development'),
         'oj_key': os.getenv('OJ_KEY', '5aLqJFte6G7IsuDNTOhjO8ICcKme62sRs0tX2XHQyzs='),
         'hash_max_views': os.getenv('HASH_VIEWS', 1000),
-        'auth_host': os.getenv('AUTH_HOST', 'http://localhost:5015')
     }
 
     def merge(self, cfg):
